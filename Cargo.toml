@@ -5,3 +5,5 @@ authors = ["Olli Paakkunainen <olli@paakkunainen.fi>", "Adarsh Krishnan <adarshk
 edition = "2018"
 
 [dependencies]
+ctrlc = "3.1.4"
+crossbeam-channel = "0.4.2"
