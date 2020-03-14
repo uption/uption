@@ -4,7 +4,7 @@ use std::{thread, time::Duration};
 use crossbeam_channel::{unbounded, Receiver, Sender};
 
 mod exporters;
-mod tools;
+mod receivers;
 
 fn main() {
     println!("wiperf started");
