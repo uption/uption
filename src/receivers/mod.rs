@@ -1,5 +1,6 @@
 //! Data receivers.
 mod dns;
+mod error;
 mod http;
 mod ping;
 
@@ -8,32 +9,40 @@ use std::{thread, time::Duration};
 use crossbeam_channel::Sender;
 
 use crate::message::Message;
+pub use error::ReceiverError;
+pub use http::HTTP;
 pub use ping::Ping;
 
-pub struct Receiver<T>
-where
-    T: Collector,
-{
-    collector: T,
+pub struct Receiver {
+    collectors: Vec<Box<dyn Collector + Send>>,
 }
 
-impl<T> Receiver<T>
-where
-    T: Collector,
-{
-    pub fn new(collector: T) -> Receiver<T> {
-        Receiver { collector }
+impl Receiver {
+    pub fn new() -> Receiver {
+        Receiver {
+            collectors: Vec::new(),
+        }
+    }
+
+    pub fn register(&mut self, collector: impl Collector + Send + 'static) {
+        self.collectors.push(Box::new(collector));
     }
 
     pub fn start(&self, sender: Sender<Message>) {
+        if self.collectors.is_empty() {
+            panic!("No receivers configured!");
+        }
+
         loop {
-            let data = self.collector.collect().unwrap();
-            sender.send(data).unwrap();
+            for collector in self.collectors.iter() {
+                let msg = collector.collect().unwrap();
+                sender.send(msg).unwrap();
+            }
             thread::sleep(Duration::from_secs(1));
         }
     }
 }
 
 pub trait Collector {
-    fn collect(&self) -> Result<Message, String>;
+    fn collect(&self) -> Result<Message, ReceiverError>;
 }
