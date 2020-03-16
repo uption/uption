@@ -16,7 +16,7 @@ Uption has a concept of *receivers* and *exporters*. Receivers generate metrics 
 
 #### Receivers
 - [ ] HTTP 🚧 In progress 🚧
-- [ ] Ping 🚧 In progress 🚧
+- [x] Ping
 
 ### Feature parity with Wiperf
 
@@ -31,7 +31,7 @@ Uption has a concept of *receivers* and *exporters*. Receivers generate metrics 
 - [ ] HTTP (https://github.com/uption/uption/issues/4)
 - [ ] Iperf3 (https://github.com/uption/uption/issues/16)
 - [ ] Ookla Speedtest (https://github.com/uption/uption/issues/17)
-- [ ] Ping (https://github.com/uption/uption/issues/3)
+- [x] Ping (https://github.com/uption/uption/issues/3)
 - [ ] Wireless adapter (https://github.com/uption/uption/issues/18)
 
 ## Contributions
