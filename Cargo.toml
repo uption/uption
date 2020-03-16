@@ -1,7 +1,14 @@
 [package]
-name = "wiperf"
+name = "uption"
 version = "0.1.0"
 authors = ["Olli Paakkunainen <olli@paakkunainen.fi>", "Adarsh Krishnan <adarshk7@gmail.com>"]
+description = """
+A tool to collect and export network performance metrics on devices like
+WLAN Pi and Raspberry Pi.
+"""
+readme = "README.md"
+license = "MIT"
+keywords = ["network", "wifi", "metrics"]
 edition = "2018"
 
 [dependencies]

@@ -9,7 +9,7 @@ mod receivers;
 use exporters::{Exporter, Stdout};
 
 fn main() {
-    println!("wiperf started");
+    println!("Uption started");
 
     ctrlc::set_handler(|| {
         println!("received Ctrl+C!");
