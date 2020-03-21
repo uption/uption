@@ -3,7 +3,6 @@ use std::io;
 
 use crossbeam_channel::Receiver;
 
-mod influxdb;
 mod stdout;
 
 use crate::message::Message;

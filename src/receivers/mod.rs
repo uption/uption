@@ -1,5 +1,4 @@
 //! Data receivers.
-mod dns;
 mod error;
 mod http;
 mod ping;
