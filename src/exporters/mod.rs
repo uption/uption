@@ -6,6 +6,7 @@ use crossbeam_channel::Receiver;
 mod influxdb;
 mod stdout;
 
+use crate::message::Message;
 pub use stdout::Stdout;
 
 pub struct Exporter<T>
@@ -23,7 +24,7 @@ where
         Exporter { sink }
     }
 
-    pub fn start(&self, receiver: Receiver<&str>) {
+    pub fn start(&self, receiver: Receiver<Message>) {
         loop {
             let data = receiver.recv().unwrap();
             self.sink.export(data).unwrap();
@@ -32,5 +33,5 @@ where
 }
 
 pub trait Sink {
-    fn export(&self, data: &str) -> Result<(), io::Error>;
+    fn export(&self, data: Message) -> Result<(), io::Error>;
 }
