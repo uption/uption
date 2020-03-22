@@ -37,11 +37,14 @@ fn execute_ping_on_command_line(ping: &Ping) -> String {
 
 fn parse_ping_output_to_message(ping_output: String) -> Message {
     let lines: Vec<&str> = ping_output.lines().rev().collect();
-    Message::new(format!(
-        "packets: {} rtt: {}",
-        parse_packets_line(lines[1]),
-        parse_rtt_line(lines[0])
-    ))
+    Message::new(
+        "ping".to_string(),
+        format!(
+            "packets: {} rtt: {}",
+            parse_packets_line(lines[1]),
+            parse_rtt_line(lines[0])
+        ),
+    )
 }
 
 fn parse_packets_line(text: &str) -> String {

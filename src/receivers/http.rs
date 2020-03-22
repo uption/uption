@@ -42,10 +42,13 @@ impl Collector for HTTP {
             .send(&mut writer)?;
         let duration = now.elapsed().as_millis();
 
-        Ok(Message::new(String::from(format!(
-            "HTTP request took {} ms and returned with status {}",
-            duration.to_string(),
-            resp.status_code()
-        ))))
+        Ok(Message::new(
+            "http".to_string(),
+            String::from(format!(
+                "HTTP request took {} ms and returned with status {}",
+                duration.to_string(),
+                resp.status_code()
+            )),
+        ))
     }
 }

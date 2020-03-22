@@ -6,13 +6,15 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Message {
     timestamp: DateTime<Utc>,
+    source: String,
     payload: String,
 }
 
 impl Message {
-    pub fn new(payload: String) -> Message {
+    pub fn new(source: String, payload: String) -> Message {
         Message {
             timestamp: Utc::now(),
+            source,
             payload,
         }
     }
@@ -20,6 +22,12 @@ impl Message {
 
 impl fmt::Display for Message {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}, {}", self.timestamp.to_rfc3339(), self.payload)
+        write!(
+            f,
+            "[{}, source={}] {}",
+            self.timestamp.to_rfc3339(),
+            self.source,
+            self.payload
+        )
     }
 }
