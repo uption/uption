@@ -4,11 +4,11 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub struct Message {
-    timestamp: DateTime<Utc>,
-    source: String,
-    payload: HashMap<String, PayloadValue>,
+    pub timestamp: DateTime<Utc>,
+    pub source: String,
+    pub payload: HashMap<String, PayloadValue>,
 }
 
 impl Message {
@@ -42,7 +42,7 @@ impl fmt::Display for Message {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub enum PayloadValue {
     String(String),
     Int8(i8),

@@ -1,6 +1,7 @@
-use url::{ParseError as UrlParseError, Url};
+use url::form_urlencoded::Serializer;
+use url::{ParseError as UrlParseError, Url, UrlQuery};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct HttpUrl {
     url: Url,
 }
@@ -31,5 +32,13 @@ impl HttpUrl {
 
     pub fn as_str(&self) -> &str {
         &self.url.as_str()
+    }
+
+    pub fn query_pairs_mut(&mut self) -> Serializer<UrlQuery> {
+        self.url.query_pairs_mut()
+    }
+
+    pub fn set_path(&mut self, path: &str) {
+        self.url.set_path(path)
     }
 }

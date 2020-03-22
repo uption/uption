@@ -14,7 +14,7 @@ Uption has a concept of _receivers_ and _exporters_. Receivers generate metrics 
 #### Exporters
 
 - [x] Stdout
-- [ ] InfluxDB ([issue #6](https://github.com/uption/uption/issues/6))
+- [x] InfluxDB
 
 #### Receivers
 

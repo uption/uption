@@ -12,8 +12,8 @@ impl Stdout {
 }
 
 impl Sink for Stdout {
-    fn export(&self, data: Message) -> Result<(), io::Error> {
-        println!("{}", data);
+    fn export(&self, msg: &Message) -> Result<(), io::Error> {
+        println!("{}", msg);
         Ok(())
     }
 }
