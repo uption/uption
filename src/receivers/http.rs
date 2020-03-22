@@ -40,15 +40,12 @@ impl Collector for HTTP {
             .timeout(timeout)
             .read_timeout(timeout)
             .send(&mut writer)?;
-        let duration = now.elapsed().as_millis();
+        let latency = now.elapsed().as_millis();
 
-        Ok(Message::new(
-            "http".to_string(),
-            String::from(format!(
-                "HTTP request took {} ms and returned with status {}",
-                duration.to_string(),
-                resp.status_code()
-            )),
-        ))
+        let mut message = Message::new("http");
+        message.insert_data("latency", &latency);
+        message.insert_data("status_code", &resp.status_code().to_string());
+
+        Ok(message)
     }
 }
