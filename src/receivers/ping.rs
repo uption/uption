@@ -37,36 +37,36 @@ fn execute_ping_on_command_line(ping: &Ping) -> String {
 
 fn parse_ping_output_to_message(ping_output: String) -> Message {
     let lines: Vec<&str> = ping_output.lines().rev().collect();
-    Message::new(
-        "ping".to_string(),
-        format!(
-            "packets: {} rtt: {}",
-            parse_packets_line(lines[1]),
-            parse_rtt_line(lines[0])
-        ),
-    )
+    let mut message = Message::new("ping");
+
+    let mut fields = parse_packets_line(lines[1]);
+    fields.append(&mut parse_rtt_line(lines[0]));
+
+    for (key, value) in fields.iter() {
+        message.insert_data(key, *value);
+    }
+
+    message
 }
 
-fn parse_packets_line(text: &str) -> String {
+fn parse_packets_line(text: &str) -> Vec<(&str, &str)> {
     let packets_data = get_packet_line_regex().captures(text).unwrap();
-    format!(
-        "Tx: {}, Rx: {}, Loss: {}%, Time: {} ms",
-        packets_data.get(1).map_or("", |m| m.as_str()),
-        packets_data.get(2).map_or("", |m| m.as_str()),
-        packets_data.get(3).map_or("", |m| m.as_str()),
-        packets_data.get(4).map_or("", |m| m.as_str())
-    )
+    vec![
+        ("pkt_tx", packets_data.get(1).map_or("", |m| m.as_str())),
+        ("pkt_rx", packets_data.get(2).map_or("", |m| m.as_str())),
+        ("pkt_loss", packets_data.get(3).map_or("", |m| m.as_str())),
+        ("test_time", packets_data.get(4).map_or("", |m| m.as_str())),
+    ]
 }
 
-fn parse_rtt_line(text: &str) -> String {
+fn parse_rtt_line(text: &str) -> Vec<(&str, &str)> {
     let rtt_data = get_rtt_line_regex().captures(text).unwrap();
-    format!(
-        "Min: {} ms, Avg: {} ms, Max: {} ms, stddev: {} ms",
-        rtt_data.get(1).map_or("", |m| m.as_str()),
-        rtt_data.get(2).map_or("", |m| m.as_str()),
-        rtt_data.get(3).map_or("", |m| m.as_str()),
-        rtt_data.get(4).map_or("", |m| m.as_str())
-    )
+    vec![
+        ("rtt_min", rtt_data.get(1).map_or("", |m| m.as_str())),
+        ("rtt_avg", rtt_data.get(2).map_or("", |m| m.as_str())),
+        ("rtt_max", rtt_data.get(3).map_or("", |m| m.as_str())),
+        ("rtt_mdev", rtt_data.get(4).map_or("", |m| m.as_str())),
+    ]
 }
 
 #[cfg(target_os = "linux")]
