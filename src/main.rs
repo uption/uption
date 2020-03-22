@@ -3,13 +3,14 @@ mod message;
 mod receivers;
 mod url;
 
+use std::env;
 use std::process;
 use std::thread;
 
 use crossbeam_channel::unbounded;
 
 use crate::url::HttpUrl;
-use exporters::{Exporter, Stdout};
+use exporters::{Exporter, InfluxDB};
 use receivers::{Ping, Receiver, HTTP};
 
 fn main() {
@@ -27,11 +28,23 @@ fn main() {
 
     let mut receiver = Receiver::new();
     receiver.register(HTTP::new(url.into()));
-    receiver.register(Ping::new(String::from("localhost"), 1));
+    receiver.register(Ping::new(String::from("8.8.8.8"), 1));
 
     let thread1 = thread::spawn(move || receiver.start(s));
 
-    let exporter = Exporter::new(Stdout::new());
+    let influxdb_url = env::var("INFLUXDB_URL").expect("INFLUXDB_URL");
+    let influxdb_bucket = env::var("INFLUXDB_BUCKET").expect("INFLUXDB_BUCKET");
+    let influxdb_org = env::var("INFLUXDB_ORG").expect("INFLUXDB_ORG");
+    let influxdb_token = env::var("INFLUXDB_TOKEN").expect("INFLUXDB_TOKEN");
+
+    let url = HttpUrl::parse(&influxdb_url).unwrap();
+    let exporter = Exporter::new(InfluxDB::new(
+        &url,
+        &influxdb_bucket,
+        &influxdb_org,
+        &influxdb_token,
+        10,
+    ));
     let thread2 = thread::spawn(move || exporter.start(r));
 
     thread1.join().expect("The sender thread has panicked");

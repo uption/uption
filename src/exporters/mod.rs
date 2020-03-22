@@ -1,11 +1,14 @@
 //! Data exporters.
+mod influxdb;
+mod stdout;
+
 use std::io;
+use std::{thread, time::Duration};
 
 use crossbeam_channel::Receiver;
 
-mod stdout;
-
 use crate::message::Message;
+pub use influxdb::InfluxDB;
 pub use stdout::Stdout;
 
 pub struct Exporter<T>
@@ -25,12 +28,21 @@ where
 
     pub fn start(&self, receiver: Receiver<Message>) {
         loop {
-            let data = receiver.recv().unwrap();
-            self.sink.export(data).unwrap();
+            let msg = receiver.recv().unwrap();
+
+            match self.sink.export(&msg) {
+                Ok(_) => {
+                    println!("Exported message from {} collector", msg.source);
+                }
+                Err(err) => {
+                    println!("Export error: {}", err);
+                    thread::sleep(Duration::from_secs(1));
+                }
+            }
         }
     }
 }
 
 pub trait Sink {
-    fn export(&self, data: Message) -> Result<(), io::Error>;
+    fn export(&self, msg: &Message) -> Result<(), io::Error>;
 }

@@ -37,7 +37,7 @@ impl Receiver {
                 let msg = collector.collect().unwrap();
                 sender.send(msg).unwrap();
             }
-            thread::sleep(Duration::from_secs(1));
+            thread::sleep(Duration::from_secs(5));
         }
     }
 }
