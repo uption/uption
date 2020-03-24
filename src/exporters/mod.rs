@@ -11,26 +11,36 @@ use crate::message::Message;
 pub use influxdb::InfluxDB;
 pub use stdout::Stdout;
 
-pub struct Exporter<T>
-where
-    T: Sink,
-{
-    sink: T,
+pub struct Exporter {
+    sink: Option<Box<dyn Sink + Send>>,
 }
 
-impl<T> Exporter<T>
-where
-    T: Sink,
-{
-    pub fn new(sink: T) -> Exporter<T> {
-        Exporter { sink }
+impl Exporter {
+    pub fn new() -> Exporter {
+        Exporter { sink: None }
+    }
+
+    pub fn register(&mut self, sink: impl Sink + Send + 'static) {
+        self.sink.replace(Box::new(sink));
     }
 
     pub fn start(&self, receiver: Receiver<Message>) {
-        loop {
-            let msg = receiver.recv().unwrap();
+        if self.sink.is_none() {
+            println!("No receivers configured!");
+            return;
+        }
+        println!("Export scheduler started");
 
-            match self.sink.export(&msg) {
+        loop {
+            let msg = match receiver.recv() {
+                Ok(msg) => msg,
+                Err(_) => {
+                    println!("Collectors disconnected. Stopping exporter.");
+                    return;
+                }
+            };
+
+            match self.sink.as_ref().unwrap().export(&msg) {
                 Ok(_) => {
                     println!("Exported message from {} collector", msg.source);
                 }

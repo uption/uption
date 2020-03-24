@@ -16,11 +16,17 @@ pub struct InfluxDB {
 }
 
 impl InfluxDB {
-    pub fn new(url: &HttpUrl, bucket: &str, org: &str, token: &str, timeout: u64) -> InfluxDB {
+    pub fn new(
+        url: &HttpUrl,
+        bucket: &str,
+        organization: &str,
+        token: &str,
+        timeout: u64,
+    ) -> InfluxDB {
         let mut url = url.clone();
         url.set_path("api/v2/write");
         url.query_pairs_mut().append_pair("bucket", bucket);
-        url.query_pairs_mut().append_pair("org", org);
+        url.query_pairs_mut().append_pair("org", organization);
         url.query_pairs_mut().append_pair("precision", "ms");
 
         InfluxDB {

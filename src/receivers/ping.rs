@@ -5,14 +5,15 @@ use regex::Regex;
 use super::error::ReceiverError;
 use super::Collector;
 use crate::message::Message;
+use crate::url::Host;
 
 pub struct Ping {
-    host: String,
+    host: Host,
     ping_count: u8,
 }
 
 impl Ping {
-    pub fn new(host: String, ping_count: u8) -> Ping {
+    pub fn new(host: Host, ping_count: u8) -> Ping {
         Ping { host, ping_count }
     }
 }
@@ -27,7 +28,11 @@ impl Collector for Ping {
 fn execute_ping_on_command_line(ping: &Ping) -> String {
     let output = Command::new("sh")
         .arg("-c")
-        .arg(format!("ping {} -c {} -q", ping.host, ping.ping_count))
+        .arg(format!(
+            "ping {} -c {} -q",
+            ping.host.to_string(),
+            ping.ping_count
+        ))
         .output()
         .expect("failed to execute process");
     std::str::from_utf8(&output.stdout)

@@ -1,0 +1,23 @@
+[general]
+hostname = "uption-host-1"
+
+[receivers]
+interval = 10
+
+[receivers.ping]
+enabled = true
+hosts = []
+
+[receivers.http]
+enabled = true
+timeout = 10
+urls = []
+
+[exporters]
+exporter = "stdout"
+
+[exporters.influxdb]
+# url = ""
+# bucket = ""
+# organization = ""
+# token = ""
