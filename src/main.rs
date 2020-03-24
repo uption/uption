@@ -1,52 +1,35 @@
+mod config;
 mod exporters;
 mod message;
 mod receivers;
+mod uption;
 mod url;
 
-use std::env;
 use std::process;
-use std::thread;
 
-use crossbeam_channel::unbounded;
-
-use crate::url::HttpUrl;
-use exporters::{Exporter, InfluxDB};
-use receivers::{Ping, Receiver, HTTP};
+use crate::config::UptionConfig;
+use uption::Uption;
 
 fn main() {
-    println!("Uption started");
+    set_ctrl_c_handler();
 
+    println!("Reading configuration");
+    let config = UptionConfig::new().unwrap_or_else(|err| {
+        println!("Configuration error: {}", err);
+        process::exit(1);
+    });
+
+    let uption = Uption::new(config);
+    uption.start();
+}
+
+fn set_ctrl_c_handler() {
     ctrlc::set_handler(|| {
         println!("received Ctrl+C!");
         process::exit(0);
     })
-    .expect("Error setting Ctrl-C handler");
-
-    let (s, r) = unbounded();
-
-    let url = HttpUrl::parse("https://www.google.com").unwrap();
-
-    let mut receiver = Receiver::new();
-    receiver.register(HTTP::new(url.into()));
-    receiver.register(Ping::new(String::from("8.8.8.8"), 1));
-
-    let thread1 = thread::spawn(move || receiver.start(s));
-
-    let influxdb_url = env::var("INFLUXDB_URL").expect("INFLUXDB_URL");
-    let influxdb_bucket = env::var("INFLUXDB_BUCKET").expect("INFLUXDB_BUCKET");
-    let influxdb_org = env::var("INFLUXDB_ORG").expect("INFLUXDB_ORG");
-    let influxdb_token = env::var("INFLUXDB_TOKEN").expect("INFLUXDB_TOKEN");
-
-    let url = HttpUrl::parse(&influxdb_url).unwrap();
-    let exporter = Exporter::new(InfluxDB::new(
-        &url,
-        &influxdb_bucket,
-        &influxdb_org,
-        &influxdb_token,
-        10,
-    ));
-    let thread2 = thread::spawn(move || exporter.start(r));
-
-    thread1.join().expect("The sender thread has panicked");
-    thread2.join().expect("The receiver thread has panicked");
+    .unwrap_or_else(|err| {
+        println!("Error setting Ctrl+C handler: {}", err);
+        process::exit(2);
+    });
 }

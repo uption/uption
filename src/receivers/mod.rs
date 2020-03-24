@@ -14,12 +14,14 @@ pub use ping::Ping;
 
 pub struct Receiver {
     collectors: Vec<Box<dyn Collector + Send>>,
+    interval: Duration,
 }
 
 impl Receiver {
-    pub fn new() -> Receiver {
+    pub fn new(interval: u64) -> Receiver {
         Receiver {
             collectors: Vec::new(),
+            interval: Duration::from_secs(interval),
         }
     }
 
@@ -29,15 +31,23 @@ impl Receiver {
 
     pub fn start(&self, sender: Sender<Message>) {
         if self.collectors.is_empty() {
-            panic!("No receivers configured!");
+            println!("No receivers configured!");
+            return;
         }
+        println!("Collection scheduler started");
 
         loop {
             for collector in self.collectors.iter() {
                 let msg = collector.collect().unwrap();
-                sender.send(msg).unwrap();
+                match sender.send(msg) {
+                    Ok(msg) => msg,
+                    Err(_) => {
+                        println!("Exporter disconnected. Stopping collectors.");
+                        return;
+                    }
+                };
             }
-            thread::sleep(Duration::from_secs(5));
+            thread::sleep(self.interval);
         }
     }
 }

@@ -10,11 +10,12 @@ use crate::url::HttpUrl;
 
 pub struct HTTP {
     url: HttpUrl,
+    timeout: u64,
 }
 
 impl HTTP {
-    pub fn new(url: HttpUrl) -> HTTP {
-        HTTP { url }
+    pub fn new(url: HttpUrl, timeout: u64) -> HTTP {
+        HTTP { url, timeout }
     }
 }
 
@@ -32,13 +33,13 @@ impl From<HttpError> for ReceiverError {
 impl Collector for HTTP {
     fn collect(&self) -> Result<Message, ReceiverError> {
         let mut writer = Vec::new();
-        let timeout = Some(Duration::from_secs(10));
 
         let now = Instant::now();
         let resp = Request::new(&self.url.as_str().parse().unwrap())
             .method(Method::HEAD)
-            .timeout(timeout)
-            .read_timeout(timeout)
+            .connect_timeout(Some(Duration::from_secs(self.timeout)))
+            .read_timeout(Some(Duration::from_secs(self.timeout)))
+            .write_timeout(Some(Duration::from_secs(self.timeout)))
             .send(&mut writer)?;
         let latency = now.elapsed().as_millis();
 
