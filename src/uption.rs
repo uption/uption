@@ -3,7 +3,7 @@ use std::thread;
 use crossbeam_channel::unbounded;
 
 use crate::config::{ExporterSelection, UptionConfig};
-use crate::exporters::{Exporter, InfluxDB, Stdout};
+use crate::exporters::{ExporterScheduler, InfluxDB, Stdout};
 use crate::receivers::{Ping, Receiver, HTTP};
 
 pub struct Uption {
@@ -24,9 +24,9 @@ impl Uption {
         self.register_http_receivers(&mut receiver);
         let collect_scheduler = thread::spawn(move || receiver.start(s));
 
-        let mut exporter = Exporter::new();
-        self.register_exporters(&mut exporter);
-        let export_scheduler = thread::spawn(move || exporter.start(r));
+        let mut export_scheduler = ExporterScheduler::new();
+        self.register_exporters(&mut export_scheduler);
+        let export_scheduler = thread::spawn(move || export_scheduler.start(r));
 
         collect_scheduler
             .join()
@@ -57,17 +57,17 @@ impl Uption {
         }
     }
 
-    fn register_exporters(&self, exporter: &mut Exporter) {
+    fn register_exporters(&self, scheduler: &mut ExporterScheduler) {
         let export = &self.config.exporters;
         match export.exporter {
-            ExporterSelection::InfluxDB => exporter.register(InfluxDB::new(
+            ExporterSelection::InfluxDB => scheduler.register(InfluxDB::new(
                 export.influxdb.url.as_ref().unwrap(),
                 &export.influxdb.bucket.as_ref().unwrap(),
                 &export.influxdb.organization.as_ref().unwrap(),
                 &export.influxdb.token.as_ref().unwrap(),
                 export.influxdb.timeout,
             )),
-            ExporterSelection::Stdout => exporter.register(Stdout::new()),
+            ExporterSelection::Stdout => scheduler.register(Stdout::new()),
         };
     }
 }
