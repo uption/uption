@@ -11,25 +11,25 @@ use crate::message::Message;
 pub use influxdb::InfluxDB;
 pub use stdout::Stdout;
 
-pub struct Exporter {
-    sink: Option<Box<dyn Sink + Send>>,
+pub struct ExporterScheduler {
+    exporter: Option<Box<dyn Exporter + Send>>,
 }
 
-impl Exporter {
-    pub fn new() -> Exporter {
-        Exporter { sink: None }
+impl ExporterScheduler {
+    pub fn new() -> ExporterScheduler {
+        ExporterScheduler { exporter: None }
     }
 
-    pub fn register(&mut self, sink: impl Sink + Send + 'static) {
-        self.sink.replace(Box::new(sink));
+    pub fn register(&mut self, exporter: impl Exporter + Send + 'static) {
+        self.exporter.replace(Box::new(exporter));
     }
 
     pub fn start(&self, receiver: Receiver<Message>) {
-        if self.sink.is_none() {
-            println!("No receivers configured!");
+        if self.exporter.is_none() {
+            println!("No exporters configured!");
             return;
         }
-        println!("Export scheduler started");
+        println!("Exporter scheduler started");
 
         loop {
             let msg = match receiver.recv() {
@@ -40,7 +40,7 @@ impl Exporter {
                 }
             };
 
-            match self.sink.as_ref().unwrap().export(&msg) {
+            match self.exporter.as_ref().unwrap().export(&msg) {
                 Ok(_) => {
                     println!("Exported message from {} collector", msg.source);
                 }
@@ -53,6 +53,6 @@ impl Exporter {
     }
 }
 
-pub trait Sink {
+pub trait Exporter {
     fn export(&self, msg: &Message) -> Result<(), io::Error>;
 }

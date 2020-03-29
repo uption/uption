@@ -5,7 +5,7 @@ use std::time::Duration;
 use http_req::request::{Method, Request};
 use http_req::response::{Response, StatusCode};
 
-use super::Sink;
+use super::Exporter;
 use crate::message::Message;
 use crate::url::HttpUrl;
 
@@ -70,7 +70,7 @@ impl InfluxDB {
     }
 }
 
-impl Sink for InfluxDB {
+impl Exporter for InfluxDB {
     fn export(&self, msg: &Message) -> Result<(), io::Error> {
         let payload = self.message_to_line_protocol(&msg);
         let resp = self.send_request(&payload);

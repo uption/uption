@@ -1,6 +1,6 @@
 use std::io;
 
-use super::Sink;
+use super::Exporter;
 use crate::message::Message;
 
 pub struct Stdout {}
@@ -11,7 +11,7 @@ impl Stdout {
     }
 }
 
-impl Sink for Stdout {
+impl Exporter for Stdout {
     fn export(&self, msg: &Message) -> Result<(), io::Error> {
         println!("{}", msg);
         Ok(())
