@@ -9,14 +9,14 @@ This tool was inspired by [wiperf](https://github.com/wifinigel/wiperf) project.
 
 ### Features
 
-Uption has a concept of _receivers_ and _exporters_. Receivers generate metrics based on different tests and exporters export the generated data.
+Uption has a concept of _collectors_ and _exporters_. Collectors generate metrics based on different tests and exporters export the generated data.
 
 #### Exporters
 
 - [x] Stdout
 - [x] InfluxDB
 
-#### Receivers
+#### Collectors
 
 - [x] HTTP
 - [x] Ping
@@ -29,7 +29,7 @@ Uption has a concept of _receivers_ and _exporters_. Receivers generate metrics 
 - [ ] JSON file ([issue #11](https://github.com/uption/uption/issues/11))
 - [ ] CSV file ([issue #12](https://github.com/uption/uption/issues/12))
 
-#### Receivers
+#### Collectors
 
 - [ ] DHCP ([issue #14](https://github.com/uption/uption/issues/14))
 - [ ] DNS ([issue #15](https://github.com/uption/uption/issues/15))

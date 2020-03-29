@@ -1,14 +1,14 @@
 [general]
 hostname = "uption-host-1"
 
-[receivers]
+[collectors]
 interval = 10
 
-[receivers.ping]
+[collectors.ping]
 enabled = true
 hosts = []
 
-[receivers.http]
+[collectors.http]
 enabled = true
 timeout = 10
 urls = []

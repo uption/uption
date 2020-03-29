@@ -1,7 +1,7 @@
+mod collectors;
 mod config;
 mod exporters;
 mod message;
-mod receivers;
 mod uption;
 mod url;
 

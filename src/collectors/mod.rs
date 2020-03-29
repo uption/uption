@@ -1,4 +1,4 @@
-//! Data receivers.
+//! Data collectors.
 mod error;
 mod http;
 mod ping;
@@ -8,18 +8,18 @@ use std::{thread, time::Duration};
 use crossbeam_channel::Sender;
 
 use crate::message::Message;
-pub use error::ReceiverError;
+pub use error::CollectorError;
 pub use http::HTTP;
 pub use ping::Ping;
 
-pub struct Receiver {
+pub struct CollectorScheduler {
     collectors: Vec<Box<dyn Collector + Send>>,
     interval: Duration,
 }
 
-impl Receiver {
-    pub fn new(interval: u64) -> Receiver {
-        Receiver {
+impl CollectorScheduler {
+    pub fn new(interval: u64) -> CollectorScheduler {
+        CollectorScheduler {
             collectors: Vec::new(),
             interval: Duration::from_secs(interval),
         }
@@ -31,10 +31,10 @@ impl Receiver {
 
     pub fn start(&self, sender: Sender<Message>) {
         if self.collectors.is_empty() {
-            println!("No receivers configured!");
+            println!("No collectors configured!");
             return;
         }
-        println!("Collection scheduler started");
+        println!("Collector scheduler started");
 
         loop {
             for collector in self.collectors.iter() {
@@ -53,5 +53,5 @@ impl Receiver {
 }
 
 pub trait Collector {
-    fn collect(&self) -> Result<Message, ReceiverError>;
+    fn collect(&self) -> Result<Message, CollectorError>;
 }
