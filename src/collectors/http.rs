@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 use http_req::error::Error as HttpError;
 use http_req::request::{Method, Request};
 
-use super::error::ReceiverError;
+use super::error::CollectorError;
 use super::Collector;
 use crate::message::Message;
 use crate::url::HttpUrl;
@@ -19,19 +19,19 @@ impl HTTP {
     }
 }
 
-impl From<HttpError> for ReceiverError {
+impl From<HttpError> for CollectorError {
     fn from(error: HttpError) -> Self {
         let err = match error {
             HttpError::IO(err) => err.to_string(),
             HttpError::Tls => String::from("TLS error"),
-            HttpError::Parse(err) => return ReceiverError::CollectionError(err.to_string()),
+            HttpError::Parse(err) => return CollectorError::CollectionError(err.to_string()),
         };
-        ReceiverError::ConnectionError(format!("{}", err))
+        CollectorError::ConnectionError(format!("{}", err))
     }
 }
 
 impl Collector for HTTP {
-    fn collect(&self) -> Result<Message, ReceiverError> {
+    fn collect(&self) -> Result<Message, CollectorError> {
         let mut writer = Vec::new();
 
         let now = Instant::now();

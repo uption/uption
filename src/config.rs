@@ -5,7 +5,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 pub struct UptionConfig {
     pub general: GeneralConfig,
-    pub receivers: ReceiversConfig,
+    pub collectors: CollectorsConfig,
     pub exporters: ExportersConfig,
 }
 
@@ -14,7 +14,7 @@ pub struct GeneralConfig {
     hostname: String,
 }
 #[derive(Debug, Deserialize)]
-pub struct ReceiversConfig {
+pub struct CollectorsConfig {
     pub interval: u64,
     pub ping: PingConfig,
     pub http: HttpConfig,

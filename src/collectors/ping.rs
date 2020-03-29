@@ -2,7 +2,7 @@ use std::process::Command;
 
 use regex::Regex;
 
-use super::error::ReceiverError;
+use super::error::CollectorError;
 use super::Collector;
 use crate::message::Message;
 use crate::url::Host;
@@ -19,7 +19,7 @@ impl Ping {
 }
 
 impl Collector for Ping {
-    fn collect(&self) -> Result<Message, ReceiverError> {
+    fn collect(&self) -> Result<Message, CollectorError> {
         let ping_output = execute_ping_on_command_line(self);
         Ok(parse_ping_output_to_message(ping_output))
     }
