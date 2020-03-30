@@ -6,6 +6,8 @@ use crate::collectors::{CollectorScheduler, Ping, HTTP};
 use crate::config::{ExporterSelection, UptionConfig};
 use crate::exporters::{ExporterScheduler, InfluxDB, Stdout};
 
+const UPTION_VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
+
 pub struct Uption {
     config: UptionConfig,
 }
@@ -16,7 +18,7 @@ impl Uption {
     }
 
     pub fn start(&self) {
-        println!("Uption started");
+        println!("Uption v{} started", UPTION_VERSION.unwrap_or("-unknown"));
         let (s, r) = unbounded();
 
         let mut collector_scheduler = CollectorScheduler::new(self.config.collectors.interval);
