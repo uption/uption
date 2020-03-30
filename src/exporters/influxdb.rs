@@ -3,7 +3,7 @@ use std::str;
 use std::time::Duration;
 
 use http_req::request::{Method, Request};
-use http_req::response::StatusCode;
+use http_req::response::{Response, StatusCode};
 
 use super::Sink;
 use crate::message::Message;
@@ -47,24 +47,27 @@ impl InfluxDB {
         }
         lines
     }
-}
 
-impl Sink for InfluxDB {
-    fn export(&self, msg: &Message) -> Result<(), io::Error> {
-        let lines = self.message_to_line_protocol(&msg);
-
+    fn send_request(&self, payload: &str) -> Response {
         let mut writer = Vec::new();
-        let resp = Request::new(&self.url.as_str().parse().unwrap())
+        Request::new(&self.url.as_str().parse().unwrap())
             .method(Method::POST)
-            .body(&lines.as_bytes())
+            .body(&payload.as_bytes())
             .header("Authorization", &self.format_token())
             .header("Content-Type", "text/plain")
-            .header("Content-Length", &lines.as_bytes().len())
+            .header("Content-Length", &payload.as_bytes().len())
             .connect_timeout(Some(Duration::from_secs(self.timeout)))
             .read_timeout(Some(Duration::from_secs(self.timeout)))
             .write_timeout(Some(Duration::from_secs(self.timeout)))
             .send(&mut writer)
-            .unwrap();
+            .unwrap()
+    }
+}
+
+impl Sink for InfluxDB {
+    fn export(&self, msg: &Message) -> Result<(), io::Error> {
+        let payload = self.message_to_line_protocol(&msg);
+        let resp = self.send_request(&payload);
 
         if resp.status_code() != StatusCode::new(204) {
             return Err(io::Error::new(
