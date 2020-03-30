@@ -8,8 +8,11 @@ WLAN Pi and Raspberry Pi.
 """
 readme = "README.md"
 license = "MIT"
-keywords = ["network", "wifi", "metrics"]
+keywords = ["network", "wifi", "metrics", "command-line-utilities"]
 edition = "2018"
+homepage = "https://github.com/uption/uption"
+repository = "https://github.com/uption/uption"
+documentation = "https://github.com/uption/uption"
 
 [dependencies]
 ctrlc = "3.1"
