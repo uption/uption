@@ -6,12 +6,12 @@ interval = 10
 
 [collectors.ping]
 enabled = true
-hosts = []
+hosts = ["example.com", "93.184.216.34"]
 
 [collectors.http]
 enabled = true
 timeout = 10
-urls = []
+urls = ["http://example.com/"]
 
 [exporters]
 exporter = "stdout"
