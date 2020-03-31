@@ -44,7 +44,7 @@ impl Uption {
 
         if ping_config.enabled {
             for host in ping_config.hosts.iter() {
-                scheduler.register(Ping::new(host.clone(), 1));
+                scheduler.register(Ping::new(host.clone(), ping_config.timeout));
             }
         }
     }
