@@ -24,6 +24,8 @@ pub struct CollectorsConfig {
 pub struct PingConfig {
     pub enabled: bool,
     pub hosts: Vec<Host>,
+    #[serde(default = "default_timeout")]
+    pub timeout: u64,
 }
 
 #[derive(Debug, Deserialize)]

@@ -6,6 +6,7 @@ interval = 10
 
 [collectors.ping]
 enabled = true
+timeout = 10
 hosts = ["example.com", "93.184.216.34"]
 
 [collectors.http]

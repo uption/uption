@@ -59,9 +59,9 @@ pub enum PayloadValue {
     Float64(f64),
 }
 
-impl From<&String> for PayloadValue {
-    fn from(item: &String) -> Self {
-        PayloadValue::String(item.clone())
+impl From<String> for PayloadValue {
+    fn from(item: String) -> Self {
+        PayloadValue::String(item)
     }
 }
 
@@ -71,75 +71,75 @@ impl From<&str> for PayloadValue {
     }
 }
 
-impl From<&i8> for PayloadValue {
-    fn from(item: &i8) -> Self {
-        PayloadValue::Int8(item.clone())
+impl From<i8> for PayloadValue {
+    fn from(item: i8) -> Self {
+        PayloadValue::Int8(item)
     }
 }
 
-impl From<&i16> for PayloadValue {
-    fn from(item: &i16) -> Self {
-        PayloadValue::Int16(item.clone())
+impl From<i16> for PayloadValue {
+    fn from(item: i16) -> Self {
+        PayloadValue::Int16(item)
     }
 }
 
-impl From<&i32> for PayloadValue {
-    fn from(item: &i32) -> Self {
-        PayloadValue::Int32(item.clone())
+impl From<i32> for PayloadValue {
+    fn from(item: i32) -> Self {
+        PayloadValue::Int32(item)
     }
 }
 
-impl From<&i64> for PayloadValue {
-    fn from(item: &i64) -> Self {
-        PayloadValue::Int64(item.clone())
+impl From<i64> for PayloadValue {
+    fn from(item: i64) -> Self {
+        PayloadValue::Int64(item)
     }
 }
 
-impl From<&i128> for PayloadValue {
-    fn from(item: &i128) -> Self {
-        PayloadValue::Int128(item.clone())
+impl From<i128> for PayloadValue {
+    fn from(item: i128) -> Self {
+        PayloadValue::Int128(item)
     }
 }
 
-impl From<&u8> for PayloadValue {
-    fn from(item: &u8) -> Self {
-        PayloadValue::Uint8(item.clone())
+impl From<u8> for PayloadValue {
+    fn from(item: u8) -> Self {
+        PayloadValue::Uint8(item)
     }
 }
 
-impl From<&u16> for PayloadValue {
-    fn from(item: &u16) -> Self {
-        PayloadValue::Uint16(item.clone())
+impl From<u16> for PayloadValue {
+    fn from(item: u16) -> Self {
+        PayloadValue::Uint16(item)
     }
 }
 
-impl From<&u32> for PayloadValue {
-    fn from(item: &u32) -> Self {
-        PayloadValue::Uint32(item.clone())
+impl From<u32> for PayloadValue {
+    fn from(item: u32) -> Self {
+        PayloadValue::Uint32(item)
     }
 }
 
-impl From<&u64> for PayloadValue {
-    fn from(item: &u64) -> Self {
-        PayloadValue::Uint64(item.clone())
+impl From<u64> for PayloadValue {
+    fn from(item: u64) -> Self {
+        PayloadValue::Uint64(item)
     }
 }
 
-impl From<&u128> for PayloadValue {
-    fn from(item: &u128) -> Self {
-        PayloadValue::Uint128(item.clone())
+impl From<u128> for PayloadValue {
+    fn from(item: u128) -> Self {
+        PayloadValue::Uint128(item)
     }
 }
 
-impl From<&f32> for PayloadValue {
-    fn from(item: &f32) -> Self {
-        PayloadValue::Float32(item.clone())
+impl From<f32> for PayloadValue {
+    fn from(item: f32) -> Self {
+        PayloadValue::Float32(item)
     }
 }
 
-impl From<&f64> for PayloadValue {
-    fn from(item: &f64) -> Self {
-        PayloadValue::Float64(item.clone())
+impl From<f64> for PayloadValue {
+    fn from(item: f64) -> Self {
+        PayloadValue::Float64(item)
     }
 }
 
