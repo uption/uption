@@ -25,10 +25,15 @@ impl Uption {
         let mut collector_scheduler = CollectorScheduler::new(self.config.collectors.interval);
         self.register_ping_collectors(&mut collector_scheduler);
         self.register_http_collectors(&mut collector_scheduler);
-        let collector_scheduler = thread::spawn(move || collector_scheduler.start(sender));
+
+        let builder = thread::Builder::new().name("collector_scheduler".into());
+        let collector_scheduler = builder
+            .spawn(move || collector_scheduler.start(sender))
+            .unwrap();
 
         let mut export_scheduler = self.create_export_scheduler(receiver);
-        let export_scheduler = thread::spawn(move || export_scheduler.start());
+        let builder = thread::Builder::new().name("export_scheduler".into());
+        let export_scheduler = builder.spawn(move || export_scheduler.start()).unwrap();
 
         collector_scheduler
             .join()
