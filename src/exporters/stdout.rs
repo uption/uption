@@ -1,6 +1,6 @@
-use std::io;
-
+//! Stdout exporter.
 use super::Exporter;
+use crate::error::Result;
 use crate::message::Message;
 
 pub struct Stdout {}
@@ -12,7 +12,7 @@ impl Stdout {
 }
 
 impl Exporter for Stdout {
-    fn export(&self, msg: &Message) -> Result<(), io::Error> {
+    fn export(&self, msg: &Message) -> Result<()> {
         println!("{}", msg);
         Ok(())
     }

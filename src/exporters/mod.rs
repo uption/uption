@@ -2,18 +2,18 @@
 mod influxdb;
 mod stdout;
 
-use std::io;
 use std::{thread, time::Duration};
 
 extern crate rand;
 use crossbeam_channel::Receiver;
 use rand::Rng;
 
+use crate::error::{Error, Result};
 use crate::message::Message;
 pub use influxdb::InfluxDB;
 pub use stdout::Stdout;
 
-const ZERO: Duration = Duration::from_secs(0);
+const ZERO_DURATION: Duration = Duration::from_secs(0);
 
 pub struct ExporterScheduler {
     exporter: Box<dyn Exporter + Send>,
@@ -69,8 +69,8 @@ impl ExporterScheduler {
         }
     }
 
-    fn handle_export_error(&mut self, message: Message, err: io::Error) {
-        println!("Export error: {}", err);
+    fn handle_export_error(&mut self, message: Message, err: Error) {
+        println!("{}", err);
         self.retry_buffer.set(message);
         self.retry_buffer.increment_error_count();
     }
@@ -85,7 +85,7 @@ impl ExporterScheduler {
 }
 
 pub trait Exporter {
-    fn export(&self, msg: &Message) -> Result<(), io::Error>;
+    fn export(&self, msg: &Message) -> Result<()>;
 }
 
 struct RetryItem {
@@ -125,7 +125,7 @@ impl RetryItem {
 
     fn backoff_duration(&self, jitter: bool) -> Duration {
         match self.error_count {
-            0 => ZERO,
+            0 => ZERO_DURATION,
             _ => {
                 let base = 200.0;
                 let multiplier = 1.5_f64;
