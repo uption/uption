@@ -1,11 +1,12 @@
-use std::io;
+//! InfluxDB exporter.
 use std::str;
 use std::time::Duration;
 
 use http_req::request::{Method, Request};
-use http_req::response::{Response, StatusCode};
+use http_req::response::StatusCode;
 
 use super::Exporter;
+use crate::error::{Error, Result, ResultError};
 use crate::message::Message;
 use crate::url::HttpUrl;
 
@@ -36,8 +37,9 @@ impl InfluxDB {
         }
     }
 
-    fn format_token(&self) -> String {
-        format!("Token {}", self.token)
+    fn send_to_influxdb(&self, message: &Message) -> Result<()> {
+        let payload = self.message_to_line_protocol(message);
+        self.send_request(&payload)
     }
 
     fn message_to_line_protocol(&self, msg: &Message) -> String {
@@ -54,9 +56,9 @@ impl InfluxDB {
         lines
     }
 
-    fn send_request(&self, payload: &str) -> Response {
+    fn send_request(&self, payload: &str) -> Result<()> {
         let mut writer = Vec::new();
-        Request::new(&self.url.as_str().parse().unwrap())
+        let resp = Request::new(&self.url.as_str().parse().unwrap())
             .method(Method::POST)
             .body(&payload.as_bytes())
             .header("Authorization", &self.format_token())
@@ -66,21 +68,25 @@ impl InfluxDB {
             .read_timeout(Some(Duration::from_secs(self.timeout)))
             .write_timeout(Some(Duration::from_secs(self.timeout)))
             .send(&mut writer)
-            .unwrap()
+            .map_err(|e| Error::new("Failed to contact InfluxDB server").context(&e.to_string()))?;
+
+        if resp.status_code() != StatusCode::new(204) {
+            return Err(Error::new(&format!(
+                "InfluxDB server returned invalid HTTP status '{}'",
+                resp.status_code()
+            ))
+            .context(str::from_utf8(&writer).unwrap()));
+        }
+        Ok(())
+    }
+
+    fn format_token(&self) -> String {
+        format!("Token {}", self.token)
     }
 }
 
 impl Exporter for InfluxDB {
-    fn export(&self, msg: &Message) -> Result<(), io::Error> {
-        let payload = self.message_to_line_protocol(&msg);
-        let resp = self.send_request(&payload);
-
-        if resp.status_code() != StatusCode::new(204) {
-            return Err(io::Error::new(
-                io::ErrorKind::Other,
-                format!("invalid status code {}", resp.status_code()),
-            ));
-        }
-        Ok(())
+    fn export(&self, message: &Message) -> Result<()> {
+        self.send_to_influxdb(message).source("influxdb_exporter")
     }
 }
