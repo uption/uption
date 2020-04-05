@@ -1,5 +1,6 @@
 mod collectors;
 mod config;
+mod error;
 mod exporters;
 mod message;
 mod uption;

@@ -1,5 +1,4 @@
 //! Data collectors.
-mod error;
 mod http;
 mod ping;
 
@@ -7,8 +6,8 @@ use std::{thread, time::Duration};
 
 use crossbeam_channel::Sender;
 
+use crate::error::Result;
 use crate::message::Message;
-pub use error::CollectorError;
 pub use http::HTTP;
 pub use ping::Ping;
 
@@ -38,7 +37,14 @@ impl CollectorScheduler {
 
         loop {
             for collector in self.collectors.iter() {
-                let msg = collector.collect().unwrap();
+                let msg = match collector.collect() {
+                    Ok(msg) => msg,
+                    Err(err) => {
+                        println!("{}", err);
+                        continue;
+                    }
+                };
+
                 match sender.send(msg) {
                     Ok(msg) => msg,
                     Err(_) => {
@@ -53,5 +59,5 @@ impl CollectorScheduler {
 }
 
 pub trait Collector {
-    fn collect(&self) -> Result<Message, CollectorError>;
+    fn collect(&self) -> Result<Message>;
 }

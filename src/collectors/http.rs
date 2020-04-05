@@ -1,10 +1,10 @@
 use std::time::{Duration, Instant};
 
-use http_req::error::Error as HttpError;
 use http_req::request::{Method, Request};
+use http_req::response::Response;
 
-use super::error::CollectorError;
 use super::Collector;
+use crate::error::{Error, Result, ResultError};
 use crate::message::Message;
 use crate::url::HttpUrl;
 
@@ -17,30 +17,23 @@ impl HTTP {
     pub fn new(url: HttpUrl, timeout: u64) -> HTTP {
         HTTP { url, timeout }
     }
-}
 
-impl From<HttpError> for CollectorError {
-    fn from(error: HttpError) -> Self {
-        let err = match error {
-            HttpError::IO(err) => err.to_string(),
-            HttpError::Tls => String::from("TLS error"),
-            HttpError::Parse(err) => return CollectorError::CollectionError(err.to_string()),
-        };
-        CollectorError::ConnectionError(format!("{}", err))
-    }
-}
-
-impl Collector for HTTP {
-    fn collect(&self) -> Result<Message, CollectorError> {
+    fn send_request(&self) -> Result<Response> {
         let mut writer = Vec::new();
-
-        let now = Instant::now();
-        let resp = Request::new(&self.url.as_str().parse().unwrap())
+        Request::new(&self.url.as_str().parse().unwrap())
             .method(Method::HEAD)
             .connect_timeout(Some(Duration::from_secs(self.timeout)))
             .read_timeout(Some(Duration::from_secs(self.timeout)))
             .write_timeout(Some(Duration::from_secs(self.timeout)))
-            .send(&mut writer)?;
+            .send(&mut writer)
+            .map_err(|e| Error::new("Failed to send HTTP request").context(&e.to_string()))
+    }
+}
+
+impl Collector for HTTP {
+    fn collect(&self) -> Result<Message> {
+        let now = Instant::now();
+        let resp = self.send_request().source("http_collector")?;
         let latency = now.elapsed().as_millis();
 
         let mut message = Message::new("http");
