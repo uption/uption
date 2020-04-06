@@ -37,8 +37,9 @@ impl Collector for HTTP {
         let latency = now.elapsed().as_millis();
 
         let mut message = Message::new("http");
-        message.insert_data("latency", latency);
-        message.insert_data("status_code", resp.status_code().to_string());
+        message.insert_metric("latency", latency);
+        message.insert_metric("status_code", resp.status_code().to_string());
+        message.insert_tag("url", self.url.as_str());
 
         Ok(message)
     }
