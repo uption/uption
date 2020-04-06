@@ -11,7 +11,7 @@ pub struct UptionConfig {
 
 #[derive(Debug, Deserialize)]
 pub struct GeneralConfig {
-    hostname: String,
+    pub hostname: String,
 }
 #[derive(Debug, Deserialize)]
 pub struct CollectorsConfig {
