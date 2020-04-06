@@ -72,7 +72,8 @@ impl Collector for Ping {
         let latency = self.get_ping_latency().source("ping_collector")?;
 
         let mut message = Message::new("ping");
-        message.insert_data("latency", latency);
+        message.insert_metric("latency", latency);
+        message.insert_tag("host", &self.host.to_string());
         Ok(message)
     }
 }

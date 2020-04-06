@@ -8,7 +8,8 @@ use serde::Serialize;
 pub struct Message {
     timestamp: DateTime<Utc>,
     source: String,
-    payload: HashMap<String, PayloadValue>,
+    tags: HashMap<String, String>,
+    metrics: HashMap<String, PayloadValue>,
 }
 
 impl Message {
@@ -16,16 +17,28 @@ impl Message {
         Message {
             timestamp: Utc::now(),
             source: String::from(source),
-            payload: HashMap::new(),
+            tags: HashMap::new(),
+            metrics: HashMap::new(),
         }
     }
 
-    pub fn insert_data(&mut self, field: &str, value: impl Into<PayloadValue>) {
-        self.payload.insert(String::from(field), value.into());
+    pub fn insert_tag(&mut self, name: &str, value: &str) {
+        self.tags.insert(String::from(name), value.to_string());
     }
 
-    pub fn payload(&self) -> &HashMap<String, PayloadValue> {
-        &self.payload
+    pub fn insert_metric(&mut self, name: &str, value: impl Into<PayloadValue>) {
+        self.metrics.insert(String::from(name), value.into());
+    }
+
+    pub fn tags(&self) -> &HashMap<String, String> {
+        &self.tags
+    }
+
+    pub fn metrics(&self) -> &HashMap<String, PayloadValue> {
+        if self.metrics.is_empty() {
+            panic!("Message has no metrics!")
+        }
+        &self.metrics
     }
 
     pub fn source(&self) -> &String {
@@ -39,17 +52,22 @@ impl Message {
 
 impl fmt::Display for Message {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut payload = String::new();
-        for (key, value) in self.payload.iter() {
-            payload.push_str(&format!(" {}={}", key, value));
+        let mut formatted_tags = String::new();
+        for (key, value) in self.tags.iter() {
+            formatted_tags.push_str(&format!(" {}={}", key, value));
+        }
+        let mut formatted_metrics = String::new();
+        for (key, value) in self.metrics.iter() {
+            formatted_metrics.push_str(&format!(" {}={}", key, value));
         }
 
         write!(
             f,
-            "[{}, source={}]{}",
+            "[{}, source={}{}]{}",
             self.timestamp.to_rfc3339(),
             self.source,
-            payload
+            formatted_tags,
+            formatted_metrics
         )
     }
 }
