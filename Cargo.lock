@@ -625,7 +625,7 @@ checksum = "60369ef7a31de49bcb3f6ca728d4ba7300d9a1658f94c727d4cab8c8d9f4aece"
 
 [[package]]
 name = "uption"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "chrono",
  "config",
