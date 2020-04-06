@@ -26,7 +26,7 @@ impl Ping {
         let output = Command::new("sh")
             .arg("-c")
             .arg(format!(
-                "ping {} -c 1 -w {}",
+                "ping {} -q -c 1 -w {}",
                 &self.host.to_string(),
                 self.timeout
             ))
@@ -44,9 +44,14 @@ impl Ping {
     }
 
     fn parse_latency_from_ping_output(&self, ping_output: &str) -> Result<f64> {
+        let last_line = ping_output
+            .lines()
+            .last()
+            .ok_or(Error::new("Empty ping command output"))?;
+
         let captures = Self::latency_regex()
-            .captures(ping_output)
-            .ok_or(Error::new("Failed to parse ping command output").context(ping_output.trim()))?;
+            .captures(last_line)
+            .ok_or(Error::new("Failed to parse ping command output").context(last_line.trim()))?;
 
         let latency = captures.get(1).map(|m| m.as_str()).unwrap();
 
@@ -58,7 +63,7 @@ impl Ping {
     }
 
     fn latency_regex() -> Regex {
-        Regex::new(r#"time=(\d+\.\d+) ms"#).expect("Failed to compile regular expression")
+        Regex::new(r#"= (\d+\.\d+)/"#).expect("Failed to compile regular expression")
     }
 }
 
