@@ -28,7 +28,7 @@ impl CollectorScheduler {
         self.collectors.push(Box::new(collector));
     }
 
-    pub fn start(&self, sender: Sender<Message>) {
+    pub fn start(&self, sender: Sender<Message>, hostname: String) {
         if self.collectors.is_empty() {
             println!("No collectors configured!");
             return;
@@ -37,13 +37,15 @@ impl CollectorScheduler {
 
         loop {
             for collector in self.collectors.iter() {
-                let msg = match collector.collect() {
+                let mut msg = match collector.collect() {
                     Ok(msg) => msg,
                     Err(err) => {
                         println!("{}", err);
                         continue;
                     }
                 };
+
+                msg.insert_tag("hostname", &hostname);
 
                 match sender.send(msg) {
                     Ok(msg) => msg,

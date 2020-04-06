@@ -27,8 +27,9 @@ impl Uption {
         self.register_http_collectors(&mut collector_scheduler);
 
         let builder = thread::Builder::new().name("collector_scheduler".into());
+        let hostname = self.config.general.hostname.to_owned();
         let collector_scheduler = builder
-            .spawn(move || collector_scheduler.start(sender))
+            .spawn(move || collector_scheduler.start(sender, hostname))
             .unwrap();
 
         let mut export_scheduler = self.create_export_scheduler(receiver);
