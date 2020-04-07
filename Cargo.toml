@@ -26,3 +26,13 @@ url = { version = "2.1", features = ["serde"] }
 http_req  = { version = "0.6", default-features = false, features = ["rust-tls"] }
 config = "0.10"
 rand = "0.7"
+
+[package.metadata.deb]
+license-file = ["LICENSE"]
+depends = "$auto"
+section = "utils"
+priority = "optional"
+assets = [
+    ["target/release/uption", "usr/bin/", "755"],
+    ["uption.toml", "etc/uption/", "644"],
+]

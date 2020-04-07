@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::url::{Host, HttpUrl};
 use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
@@ -63,9 +65,12 @@ impl UptionConfig {
     pub fn new() -> Result<Self, ConfigError> {
         let mut s = Config::new();
 
-        s.merge(File::with_name("uption"))?;
-
-        // Add local configuration file
+        if Path::new("/etc/uption").exists() {
+            s.merge(File::with_name("/etc/uption/uption"))?;
+        } else {
+            s.merge(File::with_name("uption"))?;
+        }
+        // Local configuration file for testing
         s.merge(File::with_name("uption.local.").required(false))?;
 
         // Add in settings from the environment (with a prefix of UPTION)
