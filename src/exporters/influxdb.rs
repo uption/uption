@@ -44,13 +44,13 @@ impl InfluxDB {
 
     fn message_to_line_protocol(&self, msg: &Message) -> String {
         let mut lines = String::new();
-        for (key, value) in msg.payload.iter() {
+        for (key, value) in msg.payload().iter() {
             lines.push_str(&format!(
                 "{} {}={} {}\n",
-                msg.source,
+                msg.source(),
                 key,
                 value,
-                msg.timestamp.timestamp_millis()
+                msg.timestamp().timestamp_millis()
             ))
         }
         lines

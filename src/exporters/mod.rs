@@ -62,7 +62,7 @@ impl ExporterScheduler {
     fn export(&mut self, message: Message) {
         match self.exporter.export(&message) {
             Ok(_) => {
-                println!("Exported message from {} collector", message.source);
+                println!("Exported message from {} collector", message.source());
                 self.retry_buffer.decrement_error_count();
             }
             Err(err) => self.handle_export_error(message, err),

@@ -6,9 +6,9 @@ use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 pub struct Message {
-    pub timestamp: DateTime<Utc>,
-    pub source: String,
-    pub payload: HashMap<String, PayloadValue>,
+    timestamp: DateTime<Utc>,
+    source: String,
+    payload: HashMap<String, PayloadValue>,
 }
 
 impl Message {
@@ -22,6 +22,18 @@ impl Message {
 
     pub fn insert_data(&mut self, field: &str, value: impl Into<PayloadValue>) {
         self.payload.insert(String::from(field), value.into());
+    }
+
+    pub fn payload(&self) -> &HashMap<String, PayloadValue> {
+        &self.payload
+    }
+
+    pub fn source(&self) -> &String {
+        &self.source
+    }
+
+    pub fn timestamp(&self) -> &DateTime<Utc> {
+        &self.timestamp
     }
 }
 
