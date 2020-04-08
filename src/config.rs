@@ -70,7 +70,8 @@ impl UptionConfig {
         } else {
             s.merge(File::with_name("uption"))?;
         }
-        // Local configuration file for testing
+        // Read development config only for debug builds
+        #[cfg(debug_assertions)]
         s.merge(File::with_name("uption.local.").required(false))?;
 
         // Add in settings from the environment (with a prefix of UPTION)

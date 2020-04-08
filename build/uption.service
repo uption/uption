@@ -1,0 +1,11 @@
+[Unit]
+Description=Uption service
+After=network.target
+ 
+[Service]
+Type=simple
+Restart=on-failure
+ExecStart=/usr/bin/uption
+ 
+[Install]
+WantedBy=multi-user.target
