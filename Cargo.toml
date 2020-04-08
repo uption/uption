@@ -29,10 +29,11 @@ rand = "0.7"
 
 [package.metadata.deb]
 license-file = ["LICENSE"]
-depends = "$auto"
+depends = "$auto, systemd"
 section = "utils"
 priority = "optional"
 assets = [
     ["target/release/uption", "usr/bin/", "755"],
     ["uption.toml", "etc/uption/", "644"],
+    ["build/uption.service", "/etc/systemd/system/", "644"],
 ]
