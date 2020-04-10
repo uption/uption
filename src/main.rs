@@ -2,11 +2,14 @@ mod collectors;
 mod config;
 mod error;
 mod exporters;
+mod logging;
 mod message;
 mod uption;
 mod url;
 
 use std::process;
+
+use log::{error, warn};
 
 use crate::config::UptionConfig;
 use uption::Uption;
@@ -14,7 +17,6 @@ use uption::Uption;
 fn main() {
     set_ctrl_c_handler();
 
-    println!("Reading configuration");
     let config = UptionConfig::new().unwrap_or_else(|err| {
         println!("Configuration error: {}", err);
         process::exit(1);
@@ -26,11 +28,11 @@ fn main() {
 
 fn set_ctrl_c_handler() {
     ctrlc::set_handler(|| {
-        println!("received Ctrl+C!");
+        warn!("Shutdown Uption");
         process::exit(0);
     })
     .unwrap_or_else(|err| {
-        println!("Error setting Ctrl+C handler: {}", err);
+        error!("Error setting Ctrl+C handler: {}", err);
         process::exit(2);
     });
 }

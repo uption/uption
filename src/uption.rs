@@ -1,10 +1,12 @@
 use std::thread;
 
 use crossbeam_channel::{Receiver, Sender};
+use log::info;
 
 use crate::collectors::CollectorScheduler;
 use crate::config::{Configure, UptionConfig};
 use crate::exporters::ExporterScheduler;
+use crate::logging::Logger;
 use crate::message::Message;
 
 const UPTION_VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
@@ -19,7 +21,8 @@ impl Uption {
     }
 
     pub fn start(&self) {
-        println!("Uption v{} started", UPTION_VERSION.unwrap_or("-unknown"));
+        Logger::from_config(&self.config).start();
+        info!("Uption v{} started", UPTION_VERSION.unwrap_or("-unknown"));
 
         let (sender, receiver) = crossbeam_channel::unbounded();
         let collector_scheduler = self.start_collector_scheduler(sender);
@@ -31,8 +34,7 @@ impl Uption {
         exporter_scheduler
             .join()
             .expect("The export scheduler thread has panicked");
-
-        println!("Uption stopped");
+        info!("Uption stopped");
     }
 
     fn start_collector_scheduler(&self, sender: Sender<Message>) -> thread::JoinHandle<()> {

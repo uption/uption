@@ -5,6 +5,7 @@ mod ping;
 use std::{thread, time::Duration};
 
 use crossbeam_channel::Sender;
+use log::{error, info};
 
 use crate::config::{Configure, UptionConfig};
 use crate::error::Result;
@@ -31,17 +32,17 @@ impl CollectorScheduler {
 
     pub fn start(&self, sender: Sender<Message>, hostname: String) {
         if self.collectors.is_empty() {
-            println!("No collectors configured!");
+            error!("No collectors configured!");
             return;
         }
-        println!("Collector scheduler started");
+        info!("Collector scheduler started");
 
         loop {
             for collector in self.collectors.iter() {
                 let mut msg = match collector.collect() {
                     Ok(msg) => msg,
                     Err(err) => {
-                        println!("{}", err);
+                        error!("{}", err);
                         continue;
                     }
                 };
@@ -51,7 +52,7 @@ impl CollectorScheduler {
                 match sender.send(msg) {
                     Ok(msg) => msg,
                     Err(_) => {
-                        println!("Exporter disconnected. Stopping collectors.");
+                        error!("Exporter disconnected. Stopping collectors.");
                         return;
                     }
                 };

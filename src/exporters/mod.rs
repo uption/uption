@@ -6,6 +6,7 @@ use std::{thread, time::Duration};
 
 extern crate rand;
 use crossbeam_channel::Receiver;
+use log::{debug, error, info, warn};
 use rand::Rng;
 
 use crate::config::{Configure, ExporterSelection, UptionConfig};
@@ -30,14 +31,14 @@ impl ExporterScheduler {
     }
 
     pub fn start(&mut self, receiver: Receiver<Message>) {
-        println!("Exporter scheduler started");
+        info!("Exporter scheduler started");
 
         while let Some(message) = self.receive(&receiver) {
             self.export(message);
             self.backoff_sleep();
         }
 
-        println!("Collectors disconnected. Stopping exporter.");
+        error!("Collectors disconnected. Stopping exporter.");
     }
 
     fn receive(&mut self, receiver: &Receiver<Message>) -> Option<Message> {
@@ -53,7 +54,7 @@ impl ExporterScheduler {
     fn export(&mut self, message: Message) {
         match self.exporter.export(&message) {
             Ok(_) => {
-                println!("Exported message from {} collector", message.source());
+                debug!("Exported message from {} collector", message.source());
                 self.retry_buffer.decrement_error_count();
             }
             Err(err) => self.handle_export_error(message, err),
@@ -61,7 +62,7 @@ impl ExporterScheduler {
     }
 
     fn handle_export_error(&mut self, message: Message, err: Error) {
-        println!("{}", err);
+        error!("{}", err);
         self.retry_buffer.set(message);
         self.retry_buffer.increment_error_count();
     }
@@ -69,7 +70,7 @@ impl ExporterScheduler {
     fn backoff_sleep(&self) {
         if self.retry_buffer.error_count > 0 {
             let backoff = self.retry_buffer.backoff_duration(true);
-            println!("Exporting again in {:?}", backoff);
+            warn!("Exporting again in {:?}", backoff);
             thread::sleep(backoff);
         }
     }
