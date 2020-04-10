@@ -38,29 +38,27 @@ impl InfluxDB {
     }
 
     fn send_to_influxdb(&self, message: &Message) -> Result<()> {
-        let payload = self.message_to_line_protocol(message);
+        let payload = Self::message_to_line_protocol(message);
         self.send_request(&payload)
     }
 
-    fn message_to_line_protocol(&self, msg: &Message) -> String {
-        let mut lines = String::new();
-
-        let mut tags = String::new();
+    fn message_to_line_protocol(msg: &Message) -> String {
+        let mut tags = vec![msg.source().to_string()];
         for (key, value) in msg.tags().iter() {
-            tags.push_str(&format!(",{}={}", key, value));
+            tags.push(format!("{}={}", key, value));
         }
 
+        let mut fields = Vec::new();
         for (key, value) in msg.metrics().iter() {
-            lines.push_str(&format!(
-                "{}{} {}={} {}\n",
-                msg.source(),
-                tags,
-                key,
-                value,
-                msg.timestamp().timestamp_millis()
-            ))
+            fields.push(format!("{}={}", key, value));
         }
-        lines
+
+        format!(
+            "{} {} {}",
+            tags.join(","),
+            fields.join(","),
+            msg.timestamp().timestamp_millis()
+        )
     }
 
     fn send_request(&self, payload: &str) -> Result<()> {
@@ -95,5 +93,29 @@ impl InfluxDB {
 impl Exporter for InfluxDB {
     fn export(&self, message: &Message) -> Result<()> {
         self.send_to_influxdb(message).source("influxdb_exporter")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::message::Message;
+    #[test]
+    fn test_message_to_line_protocol() {
+        let mut msg = Message::new("measurement");
+        msg.insert_tag("tag1", "1");
+        msg.insert_tag("tag2", "2");
+        msg.insert_metric("field1", "1");
+        msg.insert_metric("field2", "2");
+
+        let line = InfluxDB::message_to_line_protocol(&msg);
+
+        assert_eq!(
+            line,
+            format!(
+                "measurement,tag1=1,tag2=2 field1=1,field2=2 {}",
+                msg.timestamp().timestamp_millis()
+            )
+        );
     }
 }
