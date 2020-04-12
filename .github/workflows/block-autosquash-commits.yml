@@ -1,15 +1,15 @@
+name: Block autosquash commits
+
 on: pull_request
 
-name: Pull Requests
-
 jobs:
-  message-check:
-    name: Block Autosquash Commits
+  check-autosquash-commits:
+    name: Block autosquash commits
 
     runs-on: ubuntu-latest
 
     steps:
-      - name: Block Autosquash Commits
+      - name: Block autosquash commits
         uses: xt0rted/block-autosquash-commits-action@v2.0.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
