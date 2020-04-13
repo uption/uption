@@ -1,10 +1,10 @@
 use std::thread;
 
-use crossbeam_channel::{unbounded, Receiver};
+use crossbeam_channel::{Receiver, Sender};
 
-use crate::collectors::{CollectorScheduler, Ping, HTTP};
-use crate::config::{ExporterSelection, UptionConfig};
-use crate::exporters::{ExporterScheduler, InfluxDB, Stdout};
+use crate::collectors::CollectorScheduler;
+use crate::config::{Configure, UptionConfig};
+use crate::exporters::ExporterScheduler;
 use crate::message::Message;
 
 const UPTION_VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
@@ -20,65 +20,33 @@ impl Uption {
 
     pub fn start(&self) {
         println!("Uption v{} started", UPTION_VERSION.unwrap_or("-unknown"));
-        let (sender, receiver) = unbounded();
 
-        let mut collector_scheduler = CollectorScheduler::new(self.config.collectors.interval);
-        self.register_ping_collectors(&mut collector_scheduler);
-        self.register_http_collectors(&mut collector_scheduler);
-
-        let builder = thread::Builder::new().name("collector_scheduler".into());
-        let hostname = self.config.general.hostname.to_owned();
-        let collector_scheduler = builder
-            .spawn(move || collector_scheduler.start(sender, hostname))
-            .unwrap();
-
-        let mut export_scheduler = self.create_export_scheduler(receiver);
-        let builder = thread::Builder::new().name("export_scheduler".into());
-        let export_scheduler = builder.spawn(move || export_scheduler.start()).unwrap();
+        let (sender, receiver) = crossbeam_channel::unbounded();
+        let collector_scheduler = self.start_collector_scheduler(sender);
+        let exporter_scheduler = self.start_exporter_scheduler(receiver);
 
         collector_scheduler
             .join()
             .expect("The collector scheduler thread has panicked");
-        export_scheduler
+        exporter_scheduler
             .join()
             .expect("The export scheduler thread has panicked");
+
         println!("Uption stopped");
     }
 
-    fn register_ping_collectors(&self, scheduler: &mut CollectorScheduler) {
-        let ping_config = &self.config.collectors.ping;
-
-        if ping_config.enabled {
-            for host in ping_config.hosts.iter() {
-                scheduler.register(Ping::new(host.clone(), ping_config.timeout));
-            }
-        }
+    fn start_collector_scheduler(&self, sender: Sender<Message>) -> thread::JoinHandle<()> {
+        let scheduler = CollectorScheduler::from_config(&self.config);
+        let builder = thread::Builder::new().name("collector_scheduler".into());
+        let hostname = self.config.general.hostname.to_owned();
+        builder
+            .spawn(move || scheduler.start(sender, hostname))
+            .unwrap()
     }
 
-    fn register_http_collectors(&self, scheduler: &mut CollectorScheduler) {
-        let http_config = &self.config.collectors.http;
-
-        if http_config.enabled {
-            for url in http_config.urls.iter() {
-                scheduler.register(HTTP::new(url.clone(), http_config.timeout));
-            }
-        }
-    }
-
-    fn create_export_scheduler(&self, receiver: Receiver<Message>) -> ExporterScheduler {
-        let export = &self.config.exporters;
-        match export.exporter {
-            ExporterSelection::InfluxDB => ExporterScheduler::new(
-                InfluxDB::new(
-                    export.influxdb.url.as_ref().unwrap(),
-                    &export.influxdb.bucket.as_ref().unwrap(),
-                    &export.influxdb.organization.as_ref().unwrap(),
-                    &export.influxdb.token.as_ref().unwrap(),
-                    export.influxdb.timeout,
-                ),
-                receiver,
-            ),
-            ExporterSelection::Stdout => ExporterScheduler::new(Stdout::new(), receiver),
-        }
+    fn start_exporter_scheduler(&self, receiver: Receiver<Message>) -> thread::JoinHandle<()> {
+        let mut scheduler = ExporterScheduler::from_config(&self.config);
+        let builder = thread::Builder::new().name("export_scheduler".into());
+        builder.spawn(move || scheduler.start(receiver)).unwrap()
     }
 }

@@ -6,6 +6,7 @@ use std::{thread, time::Duration};
 
 use crossbeam_channel::Sender;
 
+use crate::config::{Configure, UptionConfig};
 use crate::error::Result;
 use crate::message::Message;
 pub use http::HTTP;
@@ -62,4 +63,26 @@ impl CollectorScheduler {
 
 pub trait Collector {
     fn collect(&self) -> Result<Message>;
+}
+
+impl Configure for CollectorScheduler {
+    fn from_config(config: &UptionConfig) -> Self {
+        let mut scheduler = CollectorScheduler::new(config.collectors.interval);
+
+        let ping_config = &config.collectors.ping;
+        if ping_config.enabled {
+            for host in ping_config.hosts.iter() {
+                scheduler.register(Ping::new(host.clone(), ping_config.timeout));
+            }
+        }
+
+        let http_config = &config.collectors.http;
+        if http_config.enabled {
+            for url in http_config.urls.iter() {
+                scheduler.register(HTTP::new(url.clone(), http_config.timeout));
+            }
+        }
+
+        scheduler
+    }
 }

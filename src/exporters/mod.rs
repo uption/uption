@@ -8,6 +8,7 @@ extern crate rand;
 use crossbeam_channel::Receiver;
 use rand::Rng;
 
+use crate::config::{Configure, ExporterSelection, UptionConfig};
 use crate::error::{Error, Result};
 use crate::message::Message;
 pub use influxdb::InfluxDB;
@@ -17,27 +18,22 @@ const ZERO_DURATION: Duration = Duration::from_secs(0);
 
 pub struct ExporterScheduler {
     exporter: Box<dyn Exporter + Send>,
-    receiver: Receiver<Message>,
     retry_buffer: RetryItem,
 }
 
 impl ExporterScheduler {
-    pub fn new(
-        exporter: impl Exporter + Send + 'static,
-        receiver: Receiver<Message>,
-    ) -> ExporterScheduler {
+    pub fn new(exporter: impl Exporter + Send + 'static) -> ExporterScheduler {
         ExporterScheduler {
             exporter: Box::new(exporter),
-            receiver,
             retry_buffer: RetryItem::new(Duration::from_secs(120)),
         }
     }
 
-    pub fn start(&mut self) {
+    pub fn start(&mut self, receiver: Receiver<Message>) {
         println!("Exporter scheduler started");
 
         loop {
-            let message = match self.receive() {
+            let message = match self.receive(&receiver) {
                 Some(message) => message,
                 None => break,
             };
@@ -49,10 +45,10 @@ impl ExporterScheduler {
         println!("Collectors disconnected. Stopping exporter.");
     }
 
-    fn receive(&mut self) -> Option<Message> {
+    fn receive(&mut self, receiver: &Receiver<Message>) -> Option<Message> {
         match self.retry_buffer.take() {
             Some(message) => Some(message),
-            None => match self.receiver.recv() {
+            None => match receiver.recv() {
                 Ok(message) => Some(message),
                 Err(_) => None,
             },
@@ -141,6 +137,21 @@ impl RetryItem {
 
                 Duration::from_millis(backoff as u64)
             }
+        }
+    }
+}
+
+impl Configure for ExporterScheduler {
+    fn from_config(config: &UptionConfig) -> Self {
+        match config.exporters.exporter {
+            ExporterSelection::InfluxDB => ExporterScheduler::new(InfluxDB::new(
+                config.exporters.influxdb.url.as_ref().unwrap(),
+                config.exporters.influxdb.bucket.as_ref().unwrap(),
+                config.exporters.influxdb.organization.as_ref().unwrap(),
+                config.exporters.influxdb.token.as_ref().unwrap(),
+                config.exporters.influxdb.timeout,
+            )),
+            ExporterSelection::Stdout => ExporterScheduler::new(Stdout::new()),
         }
     }
 }
