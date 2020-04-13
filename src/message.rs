@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 
 use chrono::{DateTime, Utc};
@@ -8,8 +8,8 @@ use serde::Serialize;
 pub struct Message {
     timestamp: DateTime<Utc>,
     source: String,
-    tags: HashMap<String, String>,
-    metrics: HashMap<String, PayloadValue>,
+    tags: BTreeMap<String, String>,
+    metrics: BTreeMap<String, PayloadValue>,
 }
 
 impl Message {
@@ -17,8 +17,8 @@ impl Message {
         Message {
             timestamp: Utc::now(),
             source: String::from(source),
-            tags: HashMap::new(),
-            metrics: HashMap::new(),
+            tags: BTreeMap::new(),
+            metrics: BTreeMap::new(),
         }
     }
 
@@ -30,11 +30,11 @@ impl Message {
         self.metrics.insert(String::from(name), value.into());
     }
 
-    pub fn tags(&self) -> &HashMap<String, String> {
+    pub fn tags(&self) -> &BTreeMap<String, String> {
         &self.tags
     }
 
-    pub fn metrics(&self) -> &HashMap<String, PayloadValue> {
+    pub fn metrics(&self) -> &BTreeMap<String, PayloadValue> {
         if self.metrics.is_empty() {
             panic!("Message has no metrics!")
         }
@@ -191,5 +191,26 @@ impl fmt::Display for PayloadValue {
             PayloadValue::Float64(val) => val.to_string(),
         };
         write!(f, "{}", value)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_display_message() {
+        let mut msg = Message::new("measurement");
+        msg.insert_tag("tag1", "1");
+        msg.insert_tag("tag2", "2");
+        msg.insert_metric("field1", "1");
+        msg.insert_metric("field2", "2");
+
+        assert_eq!(
+            msg.to_string(),
+            format!(
+                "[{}, source=measurement tag1=1 tag2=2] field1=1 field2=2",
+                msg.timestamp.to_rfc3339()
+            )
+        );
     }
 }
