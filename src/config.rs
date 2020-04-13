@@ -119,3 +119,7 @@ impl UptionConfig {
 fn default_timeout() -> u64 {
     30
 }
+
+pub trait Configure {
+    fn from_config(config: &UptionConfig) -> Self;
+}
