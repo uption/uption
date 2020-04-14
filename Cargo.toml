@@ -32,8 +32,9 @@ license-file = ["LICENSE"]
 depends = "$auto, systemd"
 section = "utils"
 priority = "optional"
+conf-files = ["/etc/uption/uption.toml", "/etc/systemd/system/uption.service"]
 assets = [
-    ["target/release/uption", "usr/bin/", "755"],
-    ["uption.toml", "etc/uption/", "644"],
+    ["target/release/uption", "/usr/bin/", "755"],
+    ["uption.toml", "/etc/uption/", "644"],
     ["build/uption.service", "/etc/systemd/system/", "644"],
 ]
