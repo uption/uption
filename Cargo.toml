@@ -1,6 +1,6 @@
 [package]
 name = "uption"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Olli Paakkunainen <olli@paakkunainen.fi>", "Adarsh Krishnan <adarshk7@gmail.com>"]
 description = """
 A tool to collect and export network performance metrics on devices like
