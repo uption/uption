@@ -31,11 +31,11 @@ impl Ping {
                 self.timeout
             ))
             .output()
-            .map_err(|e| Error::new("Failed to execute ping command").cause(e))?;
+            .map_err(|e| Error::new("Failed to execute ping command").set_cause(e))?;
 
         let stderr = String::from_utf8(output.stderr).expect("Ping output not valid utf8");
         if !stderr.is_empty() {
-            return Err(Error::new("Ping command returned an error").context(stderr.trim()));
+            return Err(Error::new("Ping command returned an error").set_context(stderr.trim()));
         }
 
         let output = String::from_utf8(output.stdout).expect("Ping output not valid utf8");
@@ -49,16 +49,16 @@ impl Ping {
             .last()
             .ok_or(Error::new("Empty ping command output"))?;
 
-        let captures = Self::latency_regex()
-            .captures(last_line)
-            .ok_or(Error::new("Failed to parse ping command output").context(last_line.trim()))?;
+        let captures = Self::latency_regex().captures(last_line).ok_or(
+            Error::new("Failed to parse ping command output").set_context(last_line.trim()),
+        )?;
 
         let latency = captures.get(1).map(|m| m.as_str()).unwrap();
 
         latency.parse().map_err(|e| {
             Error::new("Failed to convert ping latency to a number")
-                .cause(e)
-                .context(latency)
+                .set_cause(e)
+                .set_context(latency)
         })
     }
 
@@ -69,7 +69,7 @@ impl Ping {
 
 impl Collector for Ping {
     fn collect(&self) -> Result<Message> {
-        let latency = self.get_ping_latency().source("ping_collector")?;
+        let latency = self.get_ping_latency().set_source("ping_collector")?;
 
         let mut message = Message::new("ping");
         message.insert_metric("latency", latency);

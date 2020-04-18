@@ -72,7 +72,7 @@ impl fmt::Display for Message {
     }
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub enum PayloadValue {
     String(String),
     Int8(i8),

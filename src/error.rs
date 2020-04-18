@@ -23,17 +23,32 @@ impl Error {
         }
     }
 
-    pub fn source(mut self, source: &str) -> Self {
+    #[allow(dead_code)]
+    pub fn source(&self) -> &Option<String> {
+        &self.source
+    }
+
+    pub fn set_source(mut self, source: &str) -> Self {
         self.source = Some(source.to_string());
         self
     }
 
-    pub fn cause(mut self, cause: impl error::Error + 'static) -> Self {
+    #[allow(dead_code)]
+    pub fn cause(&self) -> &Option<Box<dyn error::Error>> {
+        &self.cause
+    }
+
+    pub fn set_cause(mut self, cause: impl error::Error + 'static) -> Self {
         self.cause = Some(Box::new(cause));
         self
     }
 
-    pub fn context(mut self, context: &str) -> Self {
+    #[allow(dead_code)]
+    pub fn context(&self) -> &Option<String> {
+        &self.context
+    }
+
+    pub fn set_context(mut self, context: &str) -> Self {
         self.context = Some(context.to_string());
         self
     }
@@ -61,28 +76,28 @@ impl fmt::Display for Error {
 
 impl<E: error::Error + 'static> From<E> for Error {
     fn from(err: E) -> Self {
-        Error::new(&err.to_string()).context(any::type_name::<E>())
+        Error::new(&err.to_string()).set_context(any::type_name::<E>())
     }
 }
 
 pub trait ResultError {
-    fn source(self, source: &str) -> Self;
+    fn set_source(self, source: &str) -> Self;
 
-    fn cause(self, cause: impl error::Error + 'static) -> Self;
+    fn set_cause(self, cause: impl error::Error + 'static) -> Self;
 
-    fn context(self, context: &str) -> Self;
+    fn set_context(self, context: &str) -> Self;
 }
 
 impl<T> ResultError for Result<T> {
-    fn source(self, source: &str) -> Self {
-        self.map_err(|e| e.source(source))
+    fn set_source(self, source: &str) -> Self {
+        self.map_err(|e| e.set_source(source))
     }
 
-    fn cause(self, cause: impl error::Error + 'static) -> Self {
-        self.map_err(|e| e.cause(cause))
+    fn set_cause(self, cause: impl error::Error + 'static) -> Self {
+        self.map_err(|e| e.set_cause(cause))
     }
 
-    fn context(self, context: &str) -> Self {
-        self.map_err(|e| e.context(context))
+    fn set_context(self, context: &str) -> Self {
+        self.map_err(|e| e.set_context(context))
     }
 }

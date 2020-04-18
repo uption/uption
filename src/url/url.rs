@@ -1,4 +1,5 @@
 use std::fmt;
+use std::str;
 
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer};
@@ -54,6 +55,20 @@ impl HttpUrl {
 
     pub fn set_path(&mut self, path: &str) {
         self.url.set_path(path)
+    }
+}
+
+impl str::FromStr for HttpUrl {
+    type Err = ParseError;
+
+    fn from_str(input: &str) -> Result<HttpUrl, ParseError> {
+        HttpUrl::parse(input)
+    }
+}
+
+impl fmt::Display for HttpUrl {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.url)
     }
 }
 
