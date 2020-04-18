@@ -37,27 +37,27 @@ jobs:
       - name: Fix cargo caching
         run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
 
-      - name: Cache cargo registry
+      - name: Cache cargo registry (release)
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-registry-release-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-registry-
+            ${{ runner.os }}-cargo-registry-release-
 
-      - name: Cache cargo build
+      - name: Cache cargo build (release)
         uses: actions/cache@v1
         with:
           path: target
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-build-release-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-build-
+            ${{ runner.os }}-cargo-build-release-
 
-      - name: Build
-        run: cargo build
+      - name: Build (release)
+        run: cargo build --release
 
-      - name: Run tests
-        run: cargo test
+      - name: Run tests (release)
+        run: cargo test --release
 
   create-deb-packages:
     name: Create debian packages
@@ -72,13 +72,21 @@ jobs:
       - name: Fix cargo caching
         run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
 
-      - name: Cache cargo registry
+      - name: Cache cargo registry (release)
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
-          key: ${{ runner.os }}-cache-registry-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-registry-release-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cache-registry-
+            ${{ runner.os }}-cargo-registry-release-
+
+      - name: Cache cargo build (release)
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-release-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-release-
 
       - name: Set version environment variable
         run: |
