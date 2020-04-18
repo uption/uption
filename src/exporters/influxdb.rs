@@ -2,8 +2,10 @@
 use std::str;
 use std::time::Duration;
 
-use http_req::request::{Method, Request};
-use http_req::response::StatusCode;
+use reqwest::blocking::{Client, Response};
+use reqwest::header::{self, HeaderMap, HeaderValue};
+use reqwest::StatusCode;
+use serde::Deserialize;
 
 use super::Exporter;
 use crate::error::{Error, Result, ResultError};
@@ -14,6 +16,12 @@ pub struct InfluxDB {
     url: HttpUrl,
     token: String,
     timeout: u64,
+}
+
+/// Schema for error response returned from InfluxDB API.
+#[derive(Deserialize)]
+struct ErrorResponse {
+    message: String,
 }
 
 impl InfluxDB {
@@ -39,7 +47,8 @@ impl InfluxDB {
 
     fn send_to_influxdb(&self, message: &Message) -> Result<()> {
         let payload = Self::message_to_line_protocol(message);
-        self.send_request(&payload)
+        let resp = self.send_request(payload)?;
+        Self::handle_response_errors(resp)
     }
 
     fn message_to_line_protocol(msg: &Message) -> String {
@@ -61,32 +70,52 @@ impl InfluxDB {
         )
     }
 
-    fn send_request(&self, payload: &str) -> Result<()> {
-        let mut writer = Vec::new();
-        let resp = Request::new(&self.url.as_str().parse().unwrap())
-            .method(Method::POST)
-            .body(&payload.as_bytes())
-            .header("Authorization", &self.format_token())
-            .header("Content-Type", "text/plain")
-            .header("Content-Length", &payload.as_bytes().len())
-            .connect_timeout(Some(Duration::from_secs(self.timeout)))
-            .read_timeout(Some(Duration::from_secs(self.timeout)))
-            .write_timeout(Some(Duration::from_secs(self.timeout)))
-            .send(&mut writer)
-            .map_err(|e| Error::new("Failed to contact InfluxDB server").context(&e.to_string()))?;
+    fn send_request(&self, payload: String) -> Result<Response> {
+        let client = Client::builder()
+            .timeout(Duration::from_secs(self.timeout))
+            .build()?;
 
-        if resp.status_code() != StatusCode::new(204) {
-            return Err(Error::new(&format!(
-                "InfluxDB server returned invalid HTTP status '{}'",
-                resp.status_code()
-            ))
-            .context(str::from_utf8(&writer).unwrap()));
-        }
-        Ok(())
+        let resp = client
+            .post(self.url.as_str())
+            .headers(self.construct_headers())
+            .body(payload)
+            .send()?;
+
+        Ok(resp)
+    }
+
+    fn construct_headers(&self) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            header::AUTHORIZATION,
+            HeaderValue::from_str(&self.format_token()).unwrap(),
+        );
+        headers.insert(header::CONTENT_TYPE, HeaderValue::from_static("text/plain"));
+        headers
     }
 
     fn format_token(&self) -> String {
         format!("Token {}", self.token)
+    }
+
+    fn handle_response_errors(resp: Response) -> Result<()> {
+        match resp.status() {
+            StatusCode::NO_CONTENT => Ok(()),
+            _ => {
+                let err = Error::new(&format!(
+                    "InfluxDB server returned unexpected HTTP status '{}'",
+                    resp.status().as_u16()
+                ));
+
+                // Set message field to error context if returned
+                let err = match resp.json::<ErrorResponse>() {
+                    Ok(body) => err.context(&body.message),
+                    Err(_) => err,
+                };
+
+                Err(err)
+            }
+        }
     }
 }
 

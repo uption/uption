@@ -1,10 +1,9 @@
 use std::time::{Duration, Instant};
 
-use http_req::request::{Method, Request};
-use http_req::response::Response;
+use reqwest::blocking::{Client, Response};
 
 use super::Collector;
-use crate::error::{Error, Result, ResultError};
+use crate::error::{Result, ResultError};
 use crate::message::Message;
 use crate::url::HttpUrl;
 
@@ -19,14 +18,13 @@ impl HTTP {
     }
 
     fn send_request(&self) -> Result<Response> {
-        let mut writer = Vec::new();
-        Request::new(&self.url.as_str().parse().unwrap())
-            .method(Method::HEAD)
-            .connect_timeout(Some(Duration::from_secs(self.timeout)))
-            .read_timeout(Some(Duration::from_secs(self.timeout)))
-            .write_timeout(Some(Duration::from_secs(self.timeout)))
-            .send(&mut writer)
-            .map_err(|e| Error::new("Failed to send HTTP request").context(&e.to_string()))
+        let client = Client::builder()
+            .timeout(Duration::from_secs(self.timeout))
+            .danger_accept_invalid_certs(true)
+            .build()?;
+
+        let resp = client.head(self.url.as_str()).send()?;
+        Ok(resp)
     }
 }
 
@@ -38,7 +36,7 @@ impl Collector for HTTP {
 
         let mut message = Message::new("http");
         message.insert_metric("latency", latency);
-        message.insert_metric("status_code", resp.status_code().to_string());
+        message.insert_metric("status_code", resp.status().as_u16());
         message.insert_tag("url", self.url.as_str());
 
         Ok(message)
