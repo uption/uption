@@ -92,10 +92,10 @@ impl UptionConfig {
     }
 
     fn validate_exporters(exporters: &ExportersConfig) -> Result<(), ConfigError> {
-        return match exporters.exporter {
+        match exporters.exporter {
             ExporterSelection::InfluxDB => UptionConfig::validate_influxdb(&exporters.influxdb),
             ExporterSelection::Stdout => Ok(()),
-        };
+        }
     }
 
     fn validate_influxdb(influxdb: &InfluxDBConfig) -> Result<(), ConfigError> {
