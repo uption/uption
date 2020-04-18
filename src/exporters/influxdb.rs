@@ -109,7 +109,7 @@ impl InfluxDB {
 
                 // Set message field to error context if returned
                 let err = match resp.json::<ErrorResponse>() {
-                    Ok(body) => err.context(&body.message),
+                    Ok(body) => err.set_context(&body.message),
                     Err(_) => err,
                 };
 
@@ -121,30 +121,61 @@ impl InfluxDB {
 
 impl Exporter for InfluxDB {
     fn export(&self, message: &Message) -> Result<()> {
-        self.send_to_influxdb(message).source("influxdb_exporter")
+        self.send_to_influxdb(message)
+            .set_source("influxdb_exporter")
     }
 }
 
 #[cfg(test)]
 mod tests {
+    extern crate mockito;
+    use mockito::Matcher::Regex;
+
     use super::*;
     use crate::message::Message;
-    #[test]
-    fn test_message_to_line_protocol() {
+
+    fn msg() -> Message {
         let mut msg = Message::new("measurement");
         msg.insert_tag("tag1", "1");
         msg.insert_tag("tag2", "2");
         msg.insert_metric("field1", "1");
         msg.insert_metric("field2", "2");
+        msg
+    }
 
-        let line = InfluxDB::message_to_line_protocol(&msg);
+    #[test]
+    fn export_successful() {
+        let m = mockito::mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
+            .with_status(204)
+            .with_header("content-type", "text/plain")
+            .with_header("authorization", "Token token")
+            .match_body(Regex(
+                r"^measurement,tag1=1,tag2=2 field1=1,field2=2 \d{13}$".to_string(),
+            ))
+            .create();
 
-        assert_eq!(
-            line,
-            format!(
-                "measurement,tag1=1,tag2=2 field1=1,field2=2 {}",
-                msg.timestamp().timestamp_millis()
-            )
-        );
+        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let exporter = InfluxDB::new(&url.clone(), "bucket", "org", "token", 1);
+        let result = exporter.export(&msg());
+
+        m.assert();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn export_failed() {
+        let m = mockito::mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
+            .with_status(500)
+            .with_body("{\"message\": \"error message\"}")
+            .create();
+
+        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let exporter = InfluxDB::new(&url.clone(), "bucket", "org", "token", 1);
+        let err = exporter.export(&msg()).unwrap_err();
+
+        assert_eq!(err.context().as_ref().unwrap(), "error message");
+        assert_eq!(err.source().as_ref().unwrap(), "influxdb_exporter");
+        assert!(err.cause().is_none());
+        m.assert();
     }
 }

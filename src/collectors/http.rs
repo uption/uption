@@ -31,7 +31,7 @@ impl HTTP {
 impl Collector for HTTP {
     fn collect(&self) -> Result<Message> {
         let now = Instant::now();
-        let resp = self.send_request().source("http_collector")?;
+        let resp = self.send_request().set_source("http_collector")?;
         let latency = now.elapsed().as_millis();
 
         let mut message = Message::new("http");
@@ -40,5 +40,37 @@ impl Collector for HTTP {
         message.insert_tag("url", self.url.as_str());
 
         Ok(message)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    extern crate mockito;
+
+    use super::*;
+    use crate::message::PayloadValue;
+    #[test]
+    fn collect_successful() {
+        let m = mockito::mock("HEAD", "/").with_status(201).create();
+        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let http = HTTP::new(url.clone(), 1);
+        let msg = http.collect().unwrap();
+
+        assert_eq!(msg.source(), "http");
+        assert_eq!(msg.metrics()["status_code"], PayloadValue::Uint16(201));
+        assert!(msg.metrics().get("latency").is_some());
+        assert_eq!(msg.tags()["url"], url.to_string());
+        m.assert();
+    }
+
+    #[test]
+    fn collect_failed() {
+        let url: HttpUrl = "http://localhost:12345".parse().unwrap();
+        let http = HTTP::new(url.clone(), 1);
+        let err = http.collect().unwrap_err();
+
+        assert_eq!(err.source().as_ref().unwrap(), "http_collector");
+        assert!(err.context().is_some());
+        assert!(err.cause().is_none());
     }
 }

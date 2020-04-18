@@ -27,6 +27,9 @@ reqwest = { version = "0.10", features = ["blocking", "json"] }
 config = "0.10"
 rand = "0.7"
 
+[dev-dependencies]
+mockito = "0.25"
+
 [package.metadata.deb]
 license-file = ["LICENSE"]
 depends = "$auto, systemd"
