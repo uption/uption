@@ -66,7 +66,7 @@ mod tests {
     #[test]
     fn collect_failed() {
         let url: HttpUrl = "http://localhost:12345".parse().unwrap();
-        let http = HTTP::new(url.clone(), 1);
+        let http = HTTP::new(url, 1);
         let err = http.collect().unwrap_err();
 
         assert_eq!(err.source().as_ref().unwrap(), "http_collector");

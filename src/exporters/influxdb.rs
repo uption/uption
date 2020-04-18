@@ -155,7 +155,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDB::new(&url.clone(), "bucket", "org", "token", 1);
+        let exporter = InfluxDB::new(&url, "bucket", "org", "token", 1);
         let result = exporter.export(&msg());
 
         m.assert();
@@ -170,7 +170,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDB::new(&url.clone(), "bucket", "org", "token", 1);
+        let exporter = InfluxDB::new(&url, "bucket", "org", "token", 1);
         let err = exporter.export(&msg()).unwrap_err();
 
         assert_eq!(err.context().as_ref().unwrap(), "error message");

@@ -47,11 +47,11 @@ impl Ping {
         let last_line = ping_output
             .lines()
             .last()
-            .ok_or(Error::new("Empty ping command output"))?;
+            .ok_or_else(|| Error::new("Empty ping command output"))?;
 
-        let captures = Self::latency_regex().captures(last_line).ok_or(
-            Error::new("Failed to parse ping command output").set_context(last_line.trim()),
-        )?;
+        let captures = Self::latency_regex().captures(last_line).ok_or_else(|| {
+            Error::new("Failed to parse ping command output").set_context(last_line.trim())
+        })?;
 
         let latency = captures.get(1).map(|m| m.as_str()).unwrap();
 

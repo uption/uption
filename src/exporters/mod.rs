@@ -32,12 +32,7 @@ impl ExporterScheduler {
     pub fn start(&mut self, receiver: Receiver<Message>) {
         println!("Exporter scheduler started");
 
-        loop {
-            let message = match self.receive(&receiver) {
-                Some(message) => message,
-                None => break,
-            };
-
+        while let Some(message) = self.receive(&receiver) {
             self.export(message);
             self.backoff_sleep();
         }
