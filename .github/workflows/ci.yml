@@ -65,8 +65,8 @@ jobs:
 
   block-autosquash-commits:
     name: Block autosquash commits
-
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
 
     steps:
       - name: Block autosquash commits
