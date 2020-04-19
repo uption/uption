@@ -2,6 +2,7 @@ use std::path::Path;
 
 use crate::url::{Host, HttpUrl};
 use config::{Config, ConfigError, Environment, File};
+use log::LevelFilter;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -9,6 +10,7 @@ pub struct UptionConfig {
     pub general: GeneralConfig,
     pub collectors: CollectorsConfig,
     pub exporters: ExportersConfig,
+    pub logger: LoggerConfig,
 }
 
 #[derive(Debug, Deserialize)]
@@ -42,6 +44,28 @@ pub struct HttpConfig {
 pub struct ExportersConfig {
     pub exporter: ExporterSelection,
     pub influxdb: InfluxDBConfig,
+}
+
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+#[serde(remote = "LevelFilter")]
+#[serde(rename = "log_level")]
+pub enum LevelFilterDef {
+    Off,
+    Error,
+    Warn,
+    Info,
+    Debug,
+    Trace,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LoggerConfig {
+    #[serde(with = "LevelFilterDef")]
+    pub level: LevelFilter,
+
+    pub enable_stdout: bool,
+    pub log_file: Option<String>,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]

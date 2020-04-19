@@ -1,6 +1,11 @@
 [general]
 hostname = "uption-host-1"
 
+[logger]
+level = "info"
+enable_stdout = true
+# log_file = "uption.log"
+
 [collectors]
 interval = 10
 

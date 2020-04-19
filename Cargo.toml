@@ -26,6 +26,8 @@ url = { version = "2.1", features = ["serde"] }
 reqwest = { version = "0.10", features = ["blocking", "json"] }
 config = "0.10"
 rand = "0.7"
+log = "0.4"
+fern = "0.6"
 
 [dev-dependencies]
 mockito = "0.25"
