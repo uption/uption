@@ -26,7 +26,7 @@ jobs:
 
   build-and-test:
     name: Build crate and run tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     needs: verify-version
 
     steps:
@@ -44,6 +44,7 @@ jobs:
           key: ${{ runner.os }}-cargo-registry-release-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-registry-release-
+            ${{ runner.os }}-cargo-registry-
 
       - name: Cache cargo build (release)
         uses: actions/cache@v1
@@ -52,6 +53,7 @@ jobs:
           key: ${{ runner.os }}-cargo-build-release-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-build-release-
+            ${{ runner.os }}-cargo-build-
 
       - name: Build (release)
         run: cargo build --release
@@ -61,7 +63,7 @@ jobs:
 
   create-deb-packages:
     name: Create debian packages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     needs: build-and-test
 
     steps:
