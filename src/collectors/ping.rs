@@ -77,3 +77,28 @@ impl Collector for Ping {
         Ok(message)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use rstest::*;
+
+    use super::*;
+
+    #[fixture]
+    fn ping_output() -> &'static str {
+        "PING localhost (127.0.0.1) 56(84) bytes of data.
+
+        --- 127.0.0.1 ping statistics ---
+        1 packets transmitted, 1 received, 0% packet loss, time 0ms
+        rtt min/avg/max/mdev = 10.192/10.192/10.192/0.000 ms"
+    }
+
+    #[rstest]
+    #[allow(clippy::float_cmp)]
+    fn ping_output_parsing_successful(ping_output: &str) {
+        let ping = Ping::new("localhost".parse().unwrap(), 1);
+        let result = ping.parse_latency_from_ping_output(ping_output).unwrap();
+
+        assert_eq!(result, 10.192);
+    }
+}

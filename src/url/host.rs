@@ -1,12 +1,28 @@
 use std::fmt;
+use std::str;
 
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer};
-use url::Host as UrlHost;
+use url::{Host as UrlHost, ParseError};
 
 #[derive(Debug, Clone)]
 pub enum Host {
     Host(UrlHost),
+}
+
+impl Host {
+    pub fn parse(input: &str) -> Result<Host, ParseError> {
+        let host = UrlHost::parse(input)?;
+        Ok(Host::Host(host))
+    }
+}
+
+impl str::FromStr for Host {
+    type Err = ParseError;
+
+    fn from_str(input: &str) -> Result<Host, ParseError> {
+        Host::parse(input)
+    }
 }
 
 impl fmt::Display for Host {
