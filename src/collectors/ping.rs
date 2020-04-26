@@ -101,4 +101,15 @@ mod tests {
 
         assert_eq!(result, 10.192);
     }
+
+    #[test]
+    #[ignore]
+    fn ping_collect() {
+        let ping = Ping::new("localhost".parse().unwrap(), 1);
+        let msg = ping.collect().unwrap();
+
+        assert_eq!(msg.source(), "ping");
+        assert!(msg.metrics().get("latency").is_some());
+        assert_eq!(msg.tags()["host"], "localhost");
+    }
 }
