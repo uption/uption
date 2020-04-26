@@ -37,8 +37,11 @@ jobs:
       - name: Build
         run: cargo build
 
-      - name: Run tests
+      - name: Run unit tests
         run: cargo test
+
+      - name: Run integration tests
+        run: cargo test -- --ignored
 
   lint:
     name: Run linter
