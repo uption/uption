@@ -130,21 +130,23 @@ impl Exporter for InfluxDB {
 mod tests {
     extern crate mockito;
     use mockito::Matcher::Regex;
+    use rstest::*;
 
     use super::*;
     use crate::message::Message;
 
-    fn msg() -> Message {
-        let mut msg = Message::new("measurement");
-        msg.insert_tag("tag1", "1");
-        msg.insert_tag("tag2", "2");
-        msg.insert_metric("field1", "1");
-        msg.insert_metric("field2", "2");
-        msg
+    #[fixture]
+    fn message() -> Message {
+        let mut message = Message::new("measurement");
+        message.insert_tag("tag1", "1");
+        message.insert_tag("tag2", "2");
+        message.insert_metric("field1", "1");
+        message.insert_metric("field2", "2");
+        message
     }
 
-    #[test]
-    fn export_successful() {
+    #[rstest]
+    fn export_successful(message: Message) {
         let m = mockito::mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
             .with_status(204)
             .with_header("content-type", "text/plain")
@@ -156,14 +158,14 @@ mod tests {
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
         let exporter = InfluxDB::new(&url, "bucket", "org", "token", 1);
-        let result = exporter.export(&msg());
+        let result = exporter.export(&message);
 
         m.assert();
         assert!(result.is_ok());
     }
 
-    #[test]
-    fn export_failed() {
+    #[rstest]
+    fn export_failed(message: Message) {
         let m = mockito::mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
             .with_status(500)
             .with_body("{\"message\": \"error message\"}")
@@ -171,7 +173,7 @@ mod tests {
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
         let exporter = InfluxDB::new(&url, "bucket", "org", "token", 1);
-        let err = exporter.export(&msg()).unwrap_err();
+        let err = exporter.export(&message).unwrap_err();
 
         assert_eq!(err.context().as_ref().unwrap(), "error message");
         assert_eq!(err.source().as_ref().unwrap(), "influxdb_exporter");
