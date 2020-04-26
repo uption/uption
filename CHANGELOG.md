@@ -20,6 +20,7 @@ Types of changes:
 - Replace `http_req` crate with `reqwest`.
 - Add InfluxDB exporter and HTTP collector tests.
 - Implement logging to a file and stdout.
+- Tests for ping collector.
 
 ### Fixed
 
