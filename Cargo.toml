@@ -31,6 +31,7 @@ fern = "0.6"
 
 [dev-dependencies]
 mockito = "0.25"
+rstest = "0.6"
 
 [package.metadata.deb]
 license-file = ["LICENSE"]
