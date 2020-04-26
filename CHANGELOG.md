@@ -31,6 +31,7 @@ Types of changes:
 - Add lint and format steps in CI.
 - Add scheduled dependency security audit.
 - Build and test in release mode when making a release.
+- Build Debian package for armv7.
 
 ## v0.3.1 - 2020-04-14
 
