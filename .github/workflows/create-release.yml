@@ -7,7 +7,7 @@ on:
 
 jobs:
   verify-version:
-    name: Verify that tagged version matches crate version
+    name: Verify that version and changelog are updated
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +23,11 @@ jobs:
             exit 1
           fi
         shell: bash
+
+      - name: Verify changelog entry
+        run: |
+          export CRATE_VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
+          grep -E "^## v$CRATE_VERSION - [[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$" CHANGELOG.md
 
   build-and-test:
     name: Build crate and run tests
@@ -143,9 +148,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set version environment variable
+      - name: Set version and changelog environment variables
+        id: variables
         run: |
-          echo "::set-env name=version::$(cargo pkgid | cut -d# -f2 | cut -d: -f2)"
+          export CRATE_VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
+          echo "::set-env name=version::$CRATE_VERSION"
+
+          export MAJOR=$(echo $CRATE_VERSION | cut -d'.' -f1)
+          export MINOR=$(echo $CRATE_VERSION | cut -d'.' -f2)
+          export PATCH=$(echo $CRATE_VERSION | cut -d'.' -f3)
+          export CHANGELOG=$(awk -v pat="## v$MAJOR\.$MINOR\.$PATCH - " '($0 ~ pat){flag=1; next} /## v[0-9]\.[0-9]\.[0-9] - /{flag=0} flag' CHANGELOG.md)
+
+          # Hack to support multiline variables in GA
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+          echo "::set-output name=changelog::$CHANGELOG"
 
       - name: Create release
         id: create_release
@@ -155,8 +173,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Uption ${{ github.ref }}
-          body: |
-            Uption ${{ github.ref }}
+          body: ${{ steps.variables.outputs.changelog }}
           draft: false
           prerelease: true
 
