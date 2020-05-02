@@ -1,3 +1,4 @@
+//! Uption custom Error implementation.
 use std::any;
 use std::error;
 use std::fmt;
@@ -80,6 +81,7 @@ impl<E: error::Error + 'static> From<E> for Error {
     }
 }
 
+/// Provides convenience functions to set different metadata to errors.
 pub trait ResultError {
     fn set_source(self, source: &str) -> Self;
 

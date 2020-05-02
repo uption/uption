@@ -1,4 +1,5 @@
-//! Data collectors.
+//! This module contains data collecting logic and implementations for different
+//! collectors. Collectors gather different metrics which are sent to exporter.
 mod http;
 mod ping;
 
@@ -13,6 +14,8 @@ use crate::message::Message;
 pub use http::HTTP;
 pub use ping::Ping;
 
+/// Schedules the execution of different collectors. Collectors are not executed
+/// in parallel by design so that they would not interfere with each other.
 pub struct CollectorScheduler {
     collectors: Vec<Box<dyn Collector + Send>>,
     interval: Duration,
@@ -62,7 +65,11 @@ impl CollectorScheduler {
     }
 }
 
+/// All data collectors need to implement this trait. Collector scheduler uses
+/// methods in this trait to start data collection in different collectors.
 pub trait Collector {
+    /// Starts data collection in the collector implementation and returns a
+    /// message that will be sent to exporter.
     fn collect(&self) -> Result<Message>;
 }
 

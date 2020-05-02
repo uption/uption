@@ -1,3 +1,5 @@
+//! Implementation for messages which are passed between collectors and
+//! exporters.
 use std::collections::BTreeMap;
 use std::fmt;
 

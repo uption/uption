@@ -33,6 +33,10 @@ Types of changes:
 - Build and test in release mode when making a release.
 - Build Debian package for armv7.
 
+### Documentation
+
+- Improve code documentation.
+
 ## v0.3.1 - 2020-04-14
 
 ### Changed

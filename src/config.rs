@@ -1,3 +1,4 @@
+//! Uption configuration.
 use std::path::Path;
 
 use crate::url::{Host, HttpUrl};
@@ -144,6 +145,7 @@ fn default_timeout() -> u64 {
     30
 }
 
+/// Allows instantiating structs from Uption configuration.
 pub trait Configure {
     fn from_config(config: &UptionConfig) -> Self;
 }

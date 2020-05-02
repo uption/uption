@@ -1,3 +1,5 @@
+//! HTTP collector sends a HEAD request to a defined URL and records the latency
+//! and status code of the returned response.
 use std::time::{Duration, Instant};
 
 use reqwest::blocking::{Client, Response};
