@@ -1,3 +1,6 @@
+//! Ping collector sends ICMP echo message to a defined host and records the
+//! round-trip-time. This collector uses the OS `ping` command and parses the
+//! response from stdout.
 use std::process::Command;
 
 use regex::Regex;

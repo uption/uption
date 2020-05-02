@@ -1,3 +1,4 @@
+//! Handles loading and starting Uption.
 use std::thread;
 
 use crossbeam_channel::{Receiver, Sender};
