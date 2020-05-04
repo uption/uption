@@ -15,6 +15,16 @@ Types of changes:
 
 ## [Unreleased]
 
+## v0.4.1 - 2020-05-04
+
+### Changed
+
+- Update dependencies.
+
+### Fixed
+
+- Required libgcc1 version too new in amd64 Debian package.
+
 ## v0.4.0 - 2020-05-04
 
 ### Added
