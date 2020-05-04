@@ -1,6 +1,6 @@
 [package]
 name = "uption"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Olli Paakkunainen <olli@paakkunainen.fi>", "Adarsh Krishnan <adarshk7@gmail.com>"]
 description = """
 A tool to collect and export network performance metrics on devices like
@@ -35,7 +35,7 @@ rstest = "0.6"
 
 [package.metadata.deb]
 license-file = ["LICENSE"]
-depends = "$auto, systemd"
+depends = "libgcc1, libc6, systemd"
 section = "utils"
 priority = "optional"
 conf-files = ["/etc/uption/uption.toml", "/etc/systemd/system/uption.service"]
