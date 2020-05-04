@@ -15,12 +15,14 @@ Types of changes:
 
 ## [Unreleased]
 
+## v0.4.0 - 2020-05-04
+
 ### Added
 
 - Replace `http_req` crate with `reqwest`.
 - Add InfluxDB exporter and HTTP collector tests.
 - Implement logging to a file and stdout.
-- Tests for ping collector.
+- Add tests for ping collector.
 
 ### Fixed
 
