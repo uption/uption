@@ -15,6 +15,10 @@ Types of changes:
 
 ## [Unreleased]
 
+### Changed
+
+- Rename `logger` config section to `logging`.
+
 ### Documentation
 
 - Add links to documentation.

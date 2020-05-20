@@ -1,7 +1,7 @@
 [general]
 hostname = "uption-host-1"
 
-[logger]
+[logging]
 level = "info"
 enable_stdout = true
 # log_file = "uption.log"

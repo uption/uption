@@ -48,7 +48,7 @@ impl Logger {
 
 impl Configure for Logger {
     fn from_config(config: &UptionConfig) -> Self {
-        let logger_config = &config.logger;
+        let logger_config = &config.logging;
         let logger = Logger::new(logger_config.level);
 
         let logger = if logger_config.enable_stdout {

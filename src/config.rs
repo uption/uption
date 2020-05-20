@@ -11,7 +11,7 @@ pub struct UptionConfig {
     pub general: GeneralConfig,
     pub collectors: CollectorsConfig,
     pub exporters: ExportersConfig,
-    pub logger: LoggerConfig,
+    pub logging: LoggerConfig,
 }
 
 #[derive(Debug, Deserialize)]
