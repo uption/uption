@@ -15,6 +15,10 @@ Types of changes:
 
 ## [Unreleased]
 
+### Documentation
+
+- Add links to documentation.
+
 ## v0.4.1 - 2020-05-04
 
 ### Changed
