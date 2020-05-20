@@ -4,9 +4,14 @@
 [![Crates.io](https://img.shields.io/crates/v/uption)](https://crates.io/crates/uption)
 [![Crates.io](https://img.shields.io/crates/l/uption)](./LICENSE)
 [![CI](https://github.com/uption/uption/workflows/CI/badge.svg)](https://github.com/uption/uption/actions?query=workflow%3ACI)
+[![docs](https://img.shields.io/badge/docs-Uption%20wiki-blue)](https://github.com/uption/uption/wiki)
 
 A tool to collect and export network performance metrics on devices like WLAN Pi and Raspberry Pi.
 This tool was inspired by [wiperf](https://github.com/wifinigel/wiperf) project.
+
+## Documentation
+
+Documentation can be found from [Uption wiki](https://github.com/uption/uption/wiki).
 
 ## Installation
 
