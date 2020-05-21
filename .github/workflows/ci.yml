@@ -31,7 +31,7 @@ jobs:
             ${{ runner.os }}-cargo-build-
 
       - name: Build
-        run: cargo build
+        run: cargo build --locked
 
       - name: Run unit tests
         run: cargo test
