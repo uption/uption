@@ -19,6 +19,10 @@ Types of changes:
 
 - Rename `logger` config section to `logging`.
 
+### Infrastructure
+
+- Require up to date lock file in CI.
+
 ### Documentation
 
 - Add links to documentation.
