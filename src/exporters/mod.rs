@@ -11,10 +11,10 @@ use crossbeam_channel::Receiver;
 use log::{debug, error, info, warn};
 use rand::Rng;
 
-use crate::config::{Configure, ExporterSelection, UptionConfig};
+use crate::config::{Configure, ExporterSelection, InfluxDBVersion, UptionConfig};
 use crate::error::{Error, Result};
 use crate::message::Message;
-pub use influxdb::InfluxDB;
+pub use influxdb::{InfluxDBv1, InfluxDBv2};
 pub use stdout::Stdout;
 
 const ZERO_DURATION: Duration = Duration::from_secs(0);
@@ -147,13 +147,10 @@ impl RetryItem {
 impl Configure for ExporterScheduler {
     fn from_config(config: &UptionConfig) -> Self {
         match config.exporters.exporter {
-            ExporterSelection::InfluxDB => ExporterScheduler::new(InfluxDB::new(
-                config.exporters.influxdb.url.as_ref().unwrap(),
-                config.exporters.influxdb.bucket.as_ref().unwrap(),
-                config.exporters.influxdb.organization.as_ref().unwrap(),
-                config.exporters.influxdb.token.as_ref().unwrap(),
-                config.exporters.influxdb.timeout,
-            )),
+            ExporterSelection::InfluxDB => match config.exporters.influxdb.version {
+                InfluxDBVersion::V1 => ExporterScheduler::new(InfluxDBv1::from_config(config)),
+                InfluxDBVersion::V2 => ExporterScheduler::new(InfluxDBv2::from_config(config)),
+            },
             ExporterSelection::Stdout => ExporterScheduler::new(Stdout::new()),
         }
     }

@@ -1,101 +1,65 @@
-//! InfluxDB exporter.
+//! InfluxDB API v2 exporter implementation.
 use std::str;
-use std::time::Duration;
 
-use reqwest::blocking::{Client, Response};
+use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use reqwest::StatusCode;
 use serde::Deserialize;
 
-use super::Exporter;
+use super::InfluxDB;
+use crate::config::{Configure, UptionConfig};
 use crate::error::{Error, Result, ResultError};
+use crate::exporters::Exporter;
 use crate::message::Message;
 use crate::url::HttpUrl;
 
-pub struct InfluxDB {
-    url: HttpUrl,
-    token: String,
-    timeout: u64,
-}
-
-/// Schema for error response returned from InfluxDB API.
+/// Schema for error response returned from InfluxDB v2 API.
 #[derive(Deserialize)]
 struct ErrorResponse {
     message: String,
 }
 
-impl InfluxDB {
+pub struct InfluxDBv2 {
+    url: HttpUrl,
+    token: String,
+    timeout: u64,
+}
+
+impl InfluxDBv2 {
     pub fn new(
         url: &HttpUrl,
         bucket: &str,
         organization: &str,
         token: &str,
         timeout: u64,
-    ) -> InfluxDB {
+    ) -> InfluxDBv2 {
         let mut url = url.clone();
         url.set_path("api/v2/write");
         url.query_pairs_mut().append_pair("bucket", bucket);
         url.query_pairs_mut().append_pair("org", organization);
         url.query_pairs_mut().append_pair("precision", "ms");
 
-        InfluxDB {
+        InfluxDBv2 {
             url,
             token: String::from(token),
             timeout,
         }
     }
 
-    fn send_to_influxdb(&self, message: &Message) -> Result<()> {
-        let payload = Self::message_to_line_protocol(message);
-        let resp = self.send_request(payload)?;
-        Self::handle_response_errors(resp)
+    fn format_token(&self) -> String {
+        format!("Token {}", self.token)
     }
+}
 
-    fn message_to_line_protocol(msg: &Message) -> String {
-        let mut tags = vec![msg.source().to_string()];
-        for (key, value) in msg.tags().iter() {
-            tags.push(format!("{}={}", key, value));
-        }
-
-        let mut fields = Vec::new();
-        for (key, value) in msg.metrics().iter() {
-            fields.push(format!("{}={}", key, value));
-        }
-
-        format!(
-            "{} {} {}",
-            tags.join(","),
-            fields.join(","),
-            msg.timestamp().timestamp_millis()
-        )
-    }
-
-    fn send_request(&self, payload: String) -> Result<Response> {
-        let client = Client::builder()
-            .timeout(Duration::from_secs(self.timeout))
-            .build()?;
-
-        let resp = client
-            .post(self.url.as_str())
-            .headers(self.construct_headers())
-            .body(payload)
-            .send()?;
-
-        Ok(resp)
-    }
-
-    fn construct_headers(&self) -> HeaderMap {
+impl InfluxDB for InfluxDBv2 {
+    fn set_authentication(&self, req: RequestBuilder) -> RequestBuilder {
         let mut headers = HeaderMap::new();
         headers.insert(
             header::AUTHORIZATION,
             HeaderValue::from_str(&self.format_token()).unwrap(),
         );
         headers.insert(header::CONTENT_TYPE, HeaderValue::from_static("text/plain"));
-        headers
-    }
-
-    fn format_token(&self) -> String {
-        format!("Token {}", self.token)
+        req.headers(headers)
     }
 
     fn handle_response_errors(resp: Response) -> Result<()> {
@@ -117,12 +81,32 @@ impl InfluxDB {
             }
         }
     }
+
+    fn timeout(&self) -> u64 {
+        self.timeout
+    }
+
+    fn url(&self) -> &HttpUrl {
+        &self.url
+    }
 }
 
-impl Exporter for InfluxDB {
+impl Exporter for InfluxDBv2 {
     fn export(&self, message: &Message) -> Result<()> {
         self.send_to_influxdb(message)
-            .set_source("influxdb_exporter")
+            .set_source("influxdb_v2_exporter")
+    }
+}
+
+impl Configure for InfluxDBv2 {
+    fn from_config(config: &UptionConfig) -> Self {
+        InfluxDBv2::new(
+            config.exporters.influxdb.url.as_ref().unwrap(),
+            config.exporters.influxdb.bucket.as_ref().unwrap(),
+            config.exporters.influxdb.organization.as_ref().unwrap(),
+            config.exporters.influxdb.token.as_ref().unwrap(),
+            config.exporters.influxdb.timeout,
+        )
     }
 }
 
@@ -157,7 +141,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDB::new(&url, "bucket", "org", "token", 1);
+        let exporter = InfluxDBv2::new(&url, "bucket", "org", "token", 1);
         let result = exporter.export(&message);
 
         m.assert();
@@ -172,11 +156,11 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDB::new(&url, "bucket", "org", "token", 1);
+        let exporter = InfluxDBv2::new(&url, "bucket", "org", "token", 1);
         let err = exporter.export(&message).unwrap_err();
 
         assert_eq!(err.context().as_ref().unwrap(), "error message");
-        assert_eq!(err.source().as_ref().unwrap(), "influxdb_exporter");
+        assert_eq!(err.source().as_ref().unwrap(), "influxdb_v2_exporter");
         assert!(err.cause().is_none());
         m.assert();
     }

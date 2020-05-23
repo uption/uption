@@ -15,6 +15,10 @@ Types of changes:
 
 ## [Unreleased]
 
+### Added
+
+- Implement InfluxDB v1 exporter.
+
 ### Changed
 
 - Rename `logger` config section to `logging`.
