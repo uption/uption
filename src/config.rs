@@ -76,12 +76,24 @@ pub enum ExporterSelection {
     Stdout,
 }
 
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum InfluxDBVersion {
+    V1,
+    V2,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct InfluxDBConfig {
     pub url: Option<HttpUrl>,
     pub bucket: Option<String>,
     pub organization: Option<String>,
     pub token: Option<String>,
+    pub database: Option<String>,
+    pub username: Option<String>,
+    pub password: Option<String>,
+    #[serde(default = "default_influxdb_version")]
+    pub version: InfluxDBVersion,
     #[serde(default = "default_timeout")]
     pub timeout: u64,
 }
@@ -127,14 +139,29 @@ impl UptionConfig {
         if influxdb.url.is_none() {
             return Err(ConfigError::NotFound("influxdb.url".to_string()));
         }
-        if influxdb.bucket.is_none() {
-            return Err(ConfigError::NotFound("influxdb.bucket".to_string()));
+
+        if influxdb.version == InfluxDBVersion::V1 {
+            if influxdb.database.is_none() {
+                return Err(ConfigError::NotFound("influxdb.database".to_string()));
+            }
+            if influxdb.username.is_none() {
+                return Err(ConfigError::NotFound("influxdb.username".to_string()));
+            }
+            if influxdb.password.is_none() {
+                return Err(ConfigError::NotFound("influxdb.password".to_string()));
+            }
         }
-        if influxdb.organization.is_none() {
-            return Err(ConfigError::NotFound("influxdb.organization".to_string()));
-        }
-        if influxdb.token.is_none() {
-            return Err(ConfigError::NotFound("influxdb.token".to_string()));
+
+        if influxdb.version == InfluxDBVersion::V2 {
+            if influxdb.bucket.is_none() {
+                return Err(ConfigError::NotFound("influxdb.bucket".to_string()));
+            }
+            if influxdb.organization.is_none() {
+                return Err(ConfigError::NotFound("influxdb.organization".to_string()));
+            }
+            if influxdb.token.is_none() {
+                return Err(ConfigError::NotFound("influxdb.token".to_string()));
+            }
         }
 
         Ok(())
@@ -143,6 +170,10 @@ impl UptionConfig {
 
 fn default_timeout() -> u64 {
     30
+}
+
+fn default_influxdb_version() -> InfluxDBVersion {
+    InfluxDBVersion::V2
 }
 
 /// Allows instantiating structs from Uption configuration.
