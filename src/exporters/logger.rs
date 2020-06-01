@@ -1,19 +1,22 @@
-//! Stdout exporter.
+//! Log exporter uses Uption logger to export messages.
+use log::info;
+
 use super::Exporter;
 use crate::error::Result;
 use crate::message::Message;
 
-pub struct Stdout {}
+pub struct Logger {}
 
-impl Stdout {
-    pub fn new() -> Stdout {
-        Stdout {}
+impl Logger {
+    pub fn new() -> Logger {
+        Logger {}
     }
 
     fn format_message(msg: &Message) -> String {
         let formatted_tags: String = msg
             .tags()
             .iter()
+            .filter(|(k, _)| *k != "hostname")
             .map(|(k, v)| format!(" {}=\"{}\"", k, v))
             .collect();
 
@@ -24,7 +27,7 @@ impl Stdout {
             .collect();
 
         format!(
-            "[{}] [source=\"{}\"{}]{}",
+            "timestamp=\"{}\" source=\"{}\"{}{}",
             msg.timestamp().to_rfc3339(),
             msg.source(),
             formatted_tags,
@@ -33,9 +36,9 @@ impl Stdout {
     }
 }
 
-impl Exporter for Stdout {
+impl Exporter for Logger {
     fn export(&self, msg: &Message) -> Result<()> {
-        println!("{}", Stdout::format_message(msg));
+        info!("{}", Logger::format_message(msg));
         Ok(())
     }
 }
@@ -52,9 +55,9 @@ mod tests {
         msg.insert_metric("field2", "2");
 
         assert_eq!(
-            Stdout::format_message(&msg),
+            Logger::format_message(&msg),
             format!(
-                "[{}] [source=\"measurement\" tag1=\"1\" tag2=\"2\"] field1=\"1\" field2=\"2\"",
+                "timestamp=\"{}\" source=\"measurement\" tag1=\"1\" tag2=\"2\" field1=\"1\" field2=\"2\"",
                 msg.timestamp().to_rfc3339()
             )
         );

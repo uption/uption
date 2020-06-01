@@ -9,13 +9,14 @@ pub struct Logger {
 }
 
 impl Logger {
-    pub fn new(level: LevelFilter) -> Self {
+    pub fn new(level: LevelFilter, hostname: String) -> Self {
         let dispatcher = fern::Dispatch::new()
-            .format(|out, message, record| {
+            .format(move |out, message, record| {
                 out.finish(format_args!(
-                    "{}[{}] {}",
-                    chrono::Utc::now().format("[%+]"),
+                    "[{}] {} [{}] {}",
+                    hostname,
                     record.level(),
+                    chrono::Utc::now().to_rfc3339(),
                     message
                 ))
             })
@@ -49,7 +50,7 @@ impl Logger {
 impl Configure for Logger {
     fn from_config(config: &UptionConfig) -> Self {
         let logger_config = &config.logging;
-        let logger = Logger::new(logger_config.level);
+        let logger = Logger::new(logger_config.level, String::from(&config.general.hostname));
 
         let logger = if logger_config.enable_stdout {
             logger.enable_stdout()

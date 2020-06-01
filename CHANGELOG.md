@@ -18,11 +18,13 @@ Types of changes:
 ### Added
 
 - Implement InfluxDB v1 exporter.
+- Implement logger exporter.
 
 ### Changed
 
 - Rename `logger` config section to `logging`.
 - Update dependencies.
+- Update logging format.
 
 ### Infrastructure
 

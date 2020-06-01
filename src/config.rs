@@ -74,6 +74,7 @@ pub struct LoggerConfig {
 pub enum ExporterSelection {
     InfluxDB,
     Stdout,
+    Logger,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -132,6 +133,7 @@ impl UptionConfig {
         match exporters.exporter {
             ExporterSelection::InfluxDB => UptionConfig::validate_influxdb(&exporters.influxdb),
             ExporterSelection::Stdout => Ok(()),
+            ExporterSelection::Logger => Ok(()),
         }
     }
 
