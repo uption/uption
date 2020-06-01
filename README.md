@@ -50,6 +50,7 @@ Uption has a concept of _collectors_ and _exporters_. Collectors generate metric
 
 - [x] Stdout
 - [x] InfluxDB
+- [x] Logger
 
 #### Collectors
 

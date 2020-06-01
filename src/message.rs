@@ -52,28 +52,6 @@ impl Message {
     }
 }
 
-impl fmt::Display for Message {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatted_tags = String::new();
-        for (key, value) in self.tags.iter() {
-            formatted_tags.push_str(&format!(" {}={}", key, value));
-        }
-        let mut formatted_metrics = String::new();
-        for (key, value) in self.metrics.iter() {
-            formatted_metrics.push_str(&format!(" {}={}", key, value));
-        }
-
-        write!(
-            f,
-            "[{}, source={}{}]{}",
-            self.timestamp.to_rfc3339(),
-            self.source,
-            formatted_tags,
-            formatted_metrics
-        )
-    }
-}
-
 #[derive(Serialize, Debug, Clone, PartialEq)]
 pub enum PayloadValue {
     String(String),
@@ -193,26 +171,5 @@ impl fmt::Display for PayloadValue {
             PayloadValue::Float64(val) => val.to_string(),
         };
         write!(f, "{}", value)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_display_message() {
-        let mut msg = Message::new("measurement");
-        msg.insert_tag("tag1", "1");
-        msg.insert_tag("tag2", "2");
-        msg.insert_metric("field1", "1");
-        msg.insert_metric("field2", "2");
-
-        assert_eq!(
-            msg.to_string(),
-            format!(
-                "[{}, source=measurement tag1=1 tag2=2] field1=1 field2=2",
-                msg.timestamp.to_rfc3339()
-            )
-        );
     }
 }
