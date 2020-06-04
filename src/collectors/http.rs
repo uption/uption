@@ -11,17 +11,20 @@ use crate::url::HttpUrl;
 
 pub struct HTTP {
     url: HttpUrl,
-    timeout: u64,
+    timeout: Duration,
 }
 
 impl HTTP {
     pub fn new(url: HttpUrl, timeout: u64) -> HTTP {
-        HTTP { url, timeout }
+        HTTP {
+            url,
+            timeout: Duration::from_secs(timeout),
+        }
     }
 
     fn send_request(&self) -> Result<Response> {
         let client = Client::builder()
-            .timeout(Duration::from_secs(self.timeout))
+            .timeout(self.timeout)
             .danger_accept_invalid_certs(true)
             .build()?;
 

@@ -1,4 +1,5 @@
 //! Uption configuration.
+use std::net::Ipv4Addr;
 use std::path::Path;
 
 use crate::url::{Host, HttpUrl};
@@ -23,6 +24,7 @@ pub struct CollectorsConfig {
     pub interval: u64,
     pub ping: PingConfig,
     pub http: HttpConfig,
+    pub dns: DnsConfig,
 }
 
 #[derive(Debug, Deserialize)]
@@ -37,6 +39,15 @@ pub struct PingConfig {
 pub struct HttpConfig {
     pub enabled: bool,
     pub urls: Vec<HttpUrl>,
+    #[serde(default = "default_timeout")]
+    pub timeout: u64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DnsConfig {
+    pub enabled: bool,
+    pub dns_servers: Vec<Ipv4Addr>,
+    pub hosts: Vec<Host>,
     #[serde(default = "default_timeout")]
     pub timeout: u64,
 }

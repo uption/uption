@@ -19,6 +19,7 @@ Types of changes:
 
 - Implement InfluxDB v1 exporter.
 - Implement logger exporter.
+- Implement DNS collector.
 
 ### Changed
 

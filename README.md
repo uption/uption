@@ -54,6 +54,7 @@ Uption has a concept of _collectors_ and _exporters_. Collectors generate metric
 
 #### Collectors
 
+- [x] DNS
 - [x] HTTP
 - [x] Ping
 
@@ -68,7 +69,7 @@ Uption has a concept of _collectors_ and _exporters_. Collectors generate metric
 #### Collectors
 
 - [ ] DHCP ([issue #14](https://github.com/uption/uption/issues/14))
-- [ ] DNS ([issue #15](https://github.com/uption/uption/issues/15))
+- [x] DNS
 - [x] HTTP
 - [ ] Iperf3 ([issue #16](https://github.com/uption/uption/issues/16))
 - [ ] Ookla Speedtest ([issue #17](https://github.com/uption/uption/issues/17))
