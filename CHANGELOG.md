@@ -22,6 +22,7 @@ Types of changes:
 ### Changed
 
 - Rename `logger` config section to `logging`.
+- Update dependencies.
 
 ### Infrastructure
 
