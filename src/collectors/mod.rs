@@ -1,5 +1,6 @@
 //! This module contains data collecting logic and implementations for different
 //! collectors. Collectors gather different metrics which are sent to exporter.
+mod dns;
 mod http;
 mod ping;
 
@@ -11,6 +12,7 @@ use log::{error, info};
 use crate::config::{Configure, UptionConfig};
 use crate::error::Result;
 use crate::message::Message;
+pub use dns::Dns;
 pub use http::HTTP;
 pub use ping::Ping;
 
@@ -88,6 +90,15 @@ impl Configure for CollectorScheduler {
         if http_config.enabled {
             for url in http_config.urls.iter() {
                 scheduler.register(HTTP::new(url.clone(), http_config.timeout));
+            }
+        }
+
+        let dns_config = &config.collectors.dns;
+        if dns_config.enabled {
+            for server in dns_config.dns_servers.iter() {
+                for host in dns_config.hosts.iter() {
+                    scheduler.register(Dns::new(*server, host.clone(), dns_config.timeout));
+                }
             }
         }
 

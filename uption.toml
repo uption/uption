@@ -18,6 +18,12 @@ enabled = true
 timeout = 10
 urls = ["http://example.com/"]
 
+[collectors.dns]
+enabled = false
+timeout = 10
+dns_servers = []
+hosts = []
+
 [exporters]
 exporter = "stdout"
 
