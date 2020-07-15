@@ -17,6 +17,20 @@ Types of changes:
 
 ### Added
 
+-
+
+### Changed
+
+-
+
+### Fixed
+
+-
+
+## v0.5.0 - 2020-07-15
+
+### Added
+
 - Implement InfluxDB v1 exporter.
 - Implement logger exporter.
 - Implement DNS collector.
