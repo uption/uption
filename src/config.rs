@@ -1,4 +1,5 @@
 //! Uption configuration.
+use std::fs;
 use std::net::Ipv4Addr;
 use std::path::Path;
 
@@ -7,7 +8,8 @@ use config::{Config, ConfigError, Environment, File};
 use log::LevelFilter;
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
 pub struct UptionConfig {
     pub general: GeneralConfig,
     pub collectors: CollectorsConfig,
@@ -16,43 +18,65 @@ pub struct UptionConfig {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(default)]
 pub struct GeneralConfig {
     pub hostname: String,
 }
+
+impl Default for GeneralConfig {
+    fn default() -> Self {
+        GeneralConfig {
+            hostname: get_hostname("uption-host"),
+        }
+    }
+}
 #[derive(Debug, Deserialize)]
+#[serde(default)]
 pub struct CollectorsConfig {
     pub interval: u64,
-    pub ping: PingConfig,
-    pub http: HttpConfig,
     pub dns: DnsConfig,
+    pub http: HttpConfig,
+    pub ping: PingConfig,
 }
 
-#[derive(Debug, Deserialize)]
+impl Default for CollectorsConfig {
+    fn default() -> Self {
+        CollectorsConfig {
+            interval: 300, // 5 minutes
+            dns: DnsConfig::default(),
+            http: HttpConfig::default(),
+            ping: PingConfig::default(),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
 pub struct PingConfig {
     pub enabled: bool,
     pub hosts: Vec<Host>,
-    #[serde(default = "default_timeout")]
-    pub timeout: u64,
+    pub timeout: Timeout,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
 pub struct HttpConfig {
     pub enabled: bool,
     pub urls: Vec<HttpUrl>,
-    #[serde(default = "default_timeout")]
-    pub timeout: u64,
+    pub timeout: Timeout,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
 pub struct DnsConfig {
     pub enabled: bool,
     pub dns_servers: Vec<Ipv4Addr>,
     pub hosts: Vec<Host>,
-    #[serde(default = "default_timeout")]
     pub timeout: u64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
 pub struct ExportersConfig {
     pub exporter: ExporterSelection,
     pub influxdb: InfluxDBConfig,
@@ -72,12 +96,22 @@ pub enum LevelFilterDef {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(default)]
 pub struct LoggerConfig {
     #[serde(with = "LevelFilterDef")]
     pub level: LevelFilter,
-
     pub enable_stdout: bool,
     pub log_file: Option<String>,
+}
+
+impl Default for LoggerConfig {
+    fn default() -> Self {
+        LoggerConfig {
+            level: LevelFilter::Info,
+            enable_stdout: true,
+            log_file: None,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -88,6 +122,12 @@ pub enum ExporterSelection {
     Logger,
 }
 
+impl Default for ExporterSelection {
+    fn default() -> Self {
+        ExporterSelection::Stdout
+    }
+}
+
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum InfluxDBVersion {
@@ -95,7 +135,14 @@ pub enum InfluxDBVersion {
     V2,
 }
 
-#[derive(Debug, Deserialize)]
+impl Default for InfluxDBVersion {
+    fn default() -> Self {
+        InfluxDBVersion::V2
+    }
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
 pub struct InfluxDBConfig {
     pub url: Option<HttpUrl>,
     pub bucket: Option<String>,
@@ -104,10 +151,8 @@ pub struct InfluxDBConfig {
     pub database: Option<String>,
     pub username: Option<String>,
     pub password: Option<String>,
-    #[serde(default = "default_influxdb_version")]
     pub version: InfluxDBVersion,
-    #[serde(default = "default_timeout")]
-    pub timeout: u64,
+    pub timeout: Timeout,
 }
 
 impl UptionConfig {
@@ -181,12 +226,31 @@ impl UptionConfig {
     }
 }
 
-fn default_timeout() -> u64 {
-    30
+#[derive(Deserialize, Debug, Clone, Copy)]
+pub struct Timeout(pub u64);
+
+impl Default for Timeout {
+    fn default() -> Self {
+        Timeout(30)
+    }
 }
 
-fn default_influxdb_version() -> InfluxDBVersion {
-    InfluxDBVersion::V2
+impl Into<u64> for Timeout {
+    fn into(self) -> u64 {
+        self.0
+    }
+}
+
+// Reads hostname from /etc/hostname and fallback to default on failure.
+fn get_hostname(default: &str) -> String {
+    let hostname = fs::read_to_string("/etc/hostname").map_or_else(
+        |_| default.to_owned(),
+        |s| s.lines().take(1).collect::<String>().trim().to_owned(),
+    );
+    if hostname.is_empty() || hostname.len() > 255 {
+        return default.to_owned();
+    }
+    hostname
 }
 
 /// Allows instantiating structs from Uption configuration.

@@ -6,6 +6,7 @@ use std::process::Command;
 use regex::Regex;
 
 use super::Collector;
+use crate::config::Timeout;
 use crate::error::{Error, Result, ResultError};
 use crate::message::Message;
 use crate::url::Host;
@@ -16,8 +17,11 @@ pub struct Ping {
 }
 
 impl Ping {
-    pub fn new(host: Host, timeout: u64) -> Ping {
-        Ping { host, timeout }
+    pub fn new(host: Host, timeout: Timeout) -> Ping {
+        Ping {
+            host,
+            timeout: timeout.into(),
+        }
     }
 
     fn get_ping_latency(&self) -> Result<f64> {
@@ -99,7 +103,7 @@ mod tests {
     #[rstest]
     #[allow(clippy::float_cmp)]
     fn ping_output_parsing_successful(ping_output: &str) {
-        let ping = Ping::new("localhost".parse().unwrap(), 1);
+        let ping = Ping::new("localhost".parse().unwrap(), Timeout(1));
         let result = ping.parse_latency_from_ping_output(ping_output).unwrap();
 
         assert_eq!(result, 10.192);
@@ -108,7 +112,7 @@ mod tests {
     #[test]
     #[ignore]
     fn ping_collect() {
-        let ping = Ping::new("localhost".parse().unwrap(), 1);
+        let ping = Ping::new("localhost".parse().unwrap(), Timeout(1));
         let msg = ping.collect().unwrap();
 
         assert_eq!(msg.source(), "ping");

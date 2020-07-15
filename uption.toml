@@ -1,34 +1,26 @@
+# See all the configuration options from Uption documentation:
+# https://github.com/uption/uption/wiki/Configuration
 [general]
 hostname = "uption-host-1"
 
 [logging]
 level = "info"
-enable_stdout = true
 
 [collectors]
 interval = 10
 
 [collectors.ping]
 enabled = true
-timeout = 10
 hosts = ["example.com", "93.184.216.34"]
 
 [collectors.http]
 enabled = true
-timeout = 10
 urls = ["http://example.com/"]
 
 [collectors.dns]
-enabled = false
-timeout = 10
 dns_servers = []
+enabled = false
 hosts = []
 
 [exporters]
 exporter = "stdout"
-
-[exporters.influxdb]
-# url = ""
-# bucket = ""
-# organization = ""
-# token = ""
