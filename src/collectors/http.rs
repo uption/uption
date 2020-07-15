@@ -5,6 +5,7 @@ use std::time::{Duration, Instant};
 use reqwest::blocking::{Client, Response};
 
 use super::Collector;
+use crate::config::Timeout;
 use crate::error::{Result, ResultError};
 use crate::message::Message;
 use crate::url::HttpUrl;
@@ -15,10 +16,10 @@ pub struct HTTP {
 }
 
 impl HTTP {
-    pub fn new(url: HttpUrl, timeout: u64) -> HTTP {
+    pub fn new(url: HttpUrl, timeout: Timeout) -> HTTP {
         HTTP {
             url,
-            timeout: Duration::from_secs(timeout),
+            timeout: Duration::from_secs(timeout.into()),
         }
     }
 
@@ -58,7 +59,7 @@ mod tests {
     fn collect_successful() {
         let m = mockito::mock("HEAD", "/").with_status(201).create();
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let http = HTTP::new(url.clone(), 1);
+        let http = HTTP::new(url.clone(), Timeout(1));
         let msg = http.collect().unwrap();
 
         assert_eq!(msg.source(), "http");
@@ -71,7 +72,7 @@ mod tests {
     #[test]
     fn collect_failed() {
         let url: HttpUrl = "http://localhost:12345".parse().unwrap();
-        let http = HTTP::new(url, 1);
+        let http = HTTP::new(url, Timeout(1));
         let err = http.collect().unwrap_err();
 
         assert_eq!(err.source().as_ref().unwrap(), "http_collector");

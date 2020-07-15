@@ -1,12 +1,13 @@
 //! InfluxDB API v1 exporter implementation.
 use std::str;
+use std::time::Duration;
 
 use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::StatusCode;
 use serde::Deserialize;
 
 use super::InfluxDB;
-use crate::config::{Configure, UptionConfig};
+use crate::config::{Configure, Timeout, UptionConfig};
 use crate::error::{Error, Result, ResultError};
 use crate::exporters::Exporter;
 use crate::message::Message;
@@ -22,7 +23,7 @@ pub struct InfluxDBv1 {
     url: HttpUrl,
     username: String,
     password: String,
-    timeout: u64,
+    timeout: Duration,
 }
 
 impl InfluxDBv1 {
@@ -31,7 +32,7 @@ impl InfluxDBv1 {
         database: &str,
         username: &str,
         password: &str,
-        timeout: u64,
+        timeout: Timeout,
     ) -> InfluxDBv1 {
         let mut url = url.clone();
         url.set_path("write");
@@ -42,7 +43,7 @@ impl InfluxDBv1 {
             url,
             username: username.to_string(),
             password: password.to_string(),
-            timeout,
+            timeout: Duration::from_secs(timeout.into()),
         }
     }
 }
@@ -72,7 +73,7 @@ impl InfluxDB for InfluxDBv1 {
         }
     }
 
-    fn timeout(&self) -> u64 {
+    fn timeout(&self) -> Duration {
         self.timeout
     }
 
@@ -131,7 +132,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDBv1::new(&url, "uption", "user", "pass", 1);
+        let exporter = InfluxDBv1::new(&url, "uption", "user", "pass", Timeout(1));
         let result = exporter.export(&message);
 
         m.assert();
@@ -146,7 +147,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDBv1::new(&url, "uption", "user", "pass", 1);
+        let exporter = InfluxDBv1::new(&url, "uption", "user", "pass", Timeout(1));
         let err = exporter.export(&message).unwrap_err();
 
         assert_eq!(err.context().as_ref().unwrap(), "error message");

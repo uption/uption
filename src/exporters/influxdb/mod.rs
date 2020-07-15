@@ -18,7 +18,7 @@ trait InfluxDB {
 
     fn handle_response_errors(resp: Response) -> Result<()>;
 
-    fn timeout(&self) -> u64;
+    fn timeout(&self) -> Duration;
 
     fn url(&self) -> &HttpUrl;
 
@@ -48,10 +48,7 @@ trait InfluxDB {
     }
 
     fn send_request(&self, payload: String) -> Result<Response> {
-        let client = Client::builder()
-            .timeout(Duration::from_secs(self.timeout()))
-            .build()?;
-
+        let client = Client::builder().timeout(self.timeout()).build()?;
         let req = client.post(self.url().as_str()).body(payload);
         let resp = self.set_authentication(req).send()?;
 
