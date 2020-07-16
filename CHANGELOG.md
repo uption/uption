@@ -17,11 +17,11 @@ Types of changes:
 
 ### Added
 
--
+- Add default values to all configuration options.
 
 ### Changed
 
--
+- Improve configuration validation.
 
 ### Fixed
 

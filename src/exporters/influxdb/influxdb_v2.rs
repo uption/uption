@@ -103,9 +103,9 @@ impl Configure for InfluxDBv2 {
     fn from_config(config: &UptionConfig) -> Self {
         InfluxDBv2::new(
             config.exporters.influxdb.url.as_ref().unwrap(),
-            config.exporters.influxdb.bucket.as_ref().unwrap(),
-            config.exporters.influxdb.organization.as_ref().unwrap(),
-            config.exporters.influxdb.token.as_ref().unwrap(),
+            config.exporters.influxdb.bucket.as_ref(),
+            config.exporters.influxdb.organization.as_ref(),
+            config.exporters.influxdb.token.as_ref(),
             config.exporters.influxdb.timeout,
         )
     }

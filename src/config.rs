@@ -17,10 +17,31 @@ pub struct UptionConfig {
     pub logging: LoggerConfig,
 }
 
+impl Validate for UptionConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
+        self.general.validate()?;
+        self.logging.validate()?;
+        self.collectors.validate()?;
+        self.exporters.validate()?;
+        Ok(())
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(default)]
 pub struct GeneralConfig {
     pub hostname: String,
+}
+
+impl Validate for GeneralConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
+        if self.hostname.len() > 255 {
+            return Err(ConfigError::Message(
+                "hostname maximum length is 255 bytes".to_string(),
+            ));
+        }
+        Ok(())
+    }
 }
 
 impl Default for GeneralConfig {
@@ -29,57 +50,6 @@ impl Default for GeneralConfig {
             hostname: get_hostname("uption-host"),
         }
     }
-}
-#[derive(Debug, Deserialize)]
-#[serde(default)]
-pub struct CollectorsConfig {
-    pub interval: u64,
-    pub dns: DnsConfig,
-    pub http: HttpConfig,
-    pub ping: PingConfig,
-}
-
-impl Default for CollectorsConfig {
-    fn default() -> Self {
-        CollectorsConfig {
-            interval: 300, // 5 minutes
-            dns: DnsConfig::default(),
-            http: HttpConfig::default(),
-            ping: PingConfig::default(),
-        }
-    }
-}
-
-#[derive(Debug, Deserialize, Default)]
-#[serde(default)]
-pub struct PingConfig {
-    pub enabled: bool,
-    pub hosts: Vec<Host>,
-    pub timeout: Timeout,
-}
-
-#[derive(Debug, Deserialize, Default)]
-#[serde(default)]
-pub struct HttpConfig {
-    pub enabled: bool,
-    pub urls: Vec<HttpUrl>,
-    pub timeout: Timeout,
-}
-
-#[derive(Debug, Deserialize, Default)]
-#[serde(default)]
-pub struct DnsConfig {
-    pub enabled: bool,
-    pub dns_servers: Vec<Ipv4Addr>,
-    pub hosts: Vec<Host>,
-    pub timeout: u64,
-}
-
-#[derive(Debug, Deserialize, Default)]
-#[serde(default)]
-pub struct ExportersConfig {
-    pub exporter: ExporterSelection,
-    pub influxdb: InfluxDBConfig,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -104,12 +74,133 @@ pub struct LoggerConfig {
     pub log_file: Option<String>,
 }
 
+impl Validate for LoggerConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
+        if self.log_file.is_some() && self.log_file.as_ref().unwrap().is_empty() {
+            return Err(ConfigError::Message(
+                "logging.log_file can't be empty".to_string(),
+            ));
+        }
+        Ok(())
+    }
+}
+
 impl Default for LoggerConfig {
     fn default() -> Self {
         LoggerConfig {
             level: LevelFilter::Info,
             enable_stdout: true,
             log_file: None,
+        }
+    }
+}
+#[derive(Debug, Deserialize)]
+#[serde(default)]
+pub struct CollectorsConfig {
+    pub interval: u64,
+    pub dns: DnsConfig,
+    pub http: HttpConfig,
+    pub ping: PingConfig,
+}
+
+impl Validate for CollectorsConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
+        if self.interval < 1 || self.interval > 86400 {
+            return Err(ConfigError::Message(
+                "collectors.interval minimum value is 1 and maximum value is 86400".to_string(),
+            ));
+        }
+        self.dns.validate()?;
+        self.http.validate()?;
+        self.ping.validate()?;
+        Ok(())
+    }
+}
+
+impl Default for CollectorsConfig {
+    fn default() -> Self {
+        CollectorsConfig {
+            interval: 300, // 5 minutes
+            dns: DnsConfig::default(),
+            http: HttpConfig::default(),
+            ping: PingConfig::default(),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
+pub struct DnsConfig {
+    pub enabled: bool,
+    pub dns_servers: Vec<Ipv4Addr>,
+    pub hosts: Vec<Host>,
+    pub timeout: u64,
+}
+
+impl Validate for DnsConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
+        if self.enabled {
+            if self.dns_servers.is_empty() {
+                return Err(ConfigError::Message(
+                    "dns.dns_servers can't be empty".to_string(),
+                ));
+            } else if self.hosts.is_empty() {
+                return Err(ConfigError::Message("dns.hosts can't be empty".to_string()));
+            }
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
+pub struct HttpConfig {
+    pub enabled: bool,
+    pub urls: Vec<HttpUrl>,
+    pub timeout: Timeout,
+}
+
+impl Validate for HttpConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
+        if self.enabled && self.urls.is_empty() {
+            return Err(ConfigError::Message("http.urls can't be empty".to_string()));
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
+pub struct PingConfig {
+    pub enabled: bool,
+    pub hosts: Vec<Host>,
+    pub timeout: Timeout,
+}
+
+impl Validate for PingConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
+        if self.enabled && self.hosts.is_empty() {
+            return Err(ConfigError::Message(
+                "ping.hosts can't be empty".to_string(),
+            ));
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
+pub struct ExportersConfig {
+    pub exporter: ExporterSelection,
+    pub influxdb: InfluxDBConfig,
+}
+
+impl Validate for ExportersConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
+        match self.exporter {
+            ExporterSelection::InfluxDB => self.influxdb.validate(),
+            ExporterSelection::Stdout => Ok(()),
+            ExporterSelection::Logger => Ok(()),
         }
     }
 }
@@ -128,6 +219,54 @@ impl Default for ExporterSelection {
     }
 }
 
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
+pub struct InfluxDBConfig {
+    pub url: Option<HttpUrl>,
+    pub bucket: String,
+    pub organization: String,
+    pub token: String,
+    pub database: String,
+    pub username: String,
+    pub password: String,
+    pub version: InfluxDBVersion,
+    pub timeout: Timeout,
+}
+
+impl Validate for InfluxDBConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
+        if self.url.is_none() {
+            return Err(ConfigError::NotFound("influxdb.url".to_string()));
+        }
+
+        if self.version == InfluxDBVersion::V1 {
+            if self.database.is_empty() {
+                return Err(ConfigError::NotFound("influxdb.database".to_string()));
+            }
+            if self.username.is_empty() {
+                return Err(ConfigError::NotFound("influxdb.username".to_string()));
+            }
+            if self.password.is_empty() {
+                return Err(ConfigError::NotFound("influxdb.password".to_string()));
+            }
+        }
+
+        if self.version == InfluxDBVersion::V2 {
+            if self.bucket.is_empty() {
+                return Err(ConfigError::NotFound("influxdb.bucket".to_string()));
+            }
+            if self.organization.is_empty() {
+                return Err(ConfigError::NotFound("influxdb.organization".to_string()));
+            }
+            if self.token.is_empty() {
+                return Err(ConfigError::NotFound("influxdb.token".to_string()));
+            }
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum InfluxDBVersion {
@@ -141,25 +280,11 @@ impl Default for InfluxDBVersion {
     }
 }
 
-#[derive(Debug, Deserialize, Default)]
-#[serde(default)]
-pub struct InfluxDBConfig {
-    pub url: Option<HttpUrl>,
-    pub bucket: Option<String>,
-    pub organization: Option<String>,
-    pub token: Option<String>,
-    pub database: Option<String>,
-    pub username: Option<String>,
-    pub password: Option<String>,
-    pub version: InfluxDBVersion,
-    pub timeout: Timeout,
-}
-
 impl UptionConfig {
     pub fn new() -> Result<Self, ConfigError> {
         let mut s = Config::new();
 
-        if Path::new("/etc/uption").exists() {
+        if Path::new("/etc/uptions").exists() {
             s.merge(File::with_name("/etc/uption/uption"))?;
         } else {
             s.merge(File::with_name("uption"))?;
@@ -177,52 +302,6 @@ impl UptionConfig {
         config.validate()?;
 
         Ok(config)
-    }
-
-    /// Performs additional validation after configuration is deserialized.
-    fn validate(&self) -> Result<(), ConfigError> {
-        UptionConfig::validate_exporters(&self.exporters)?;
-        Ok(())
-    }
-
-    fn validate_exporters(exporters: &ExportersConfig) -> Result<(), ConfigError> {
-        match exporters.exporter {
-            ExporterSelection::InfluxDB => UptionConfig::validate_influxdb(&exporters.influxdb),
-            ExporterSelection::Stdout => Ok(()),
-            ExporterSelection::Logger => Ok(()),
-        }
-    }
-
-    fn validate_influxdb(influxdb: &InfluxDBConfig) -> Result<(), ConfigError> {
-        if influxdb.url.is_none() {
-            return Err(ConfigError::NotFound("influxdb.url".to_string()));
-        }
-
-        if influxdb.version == InfluxDBVersion::V1 {
-            if influxdb.database.is_none() {
-                return Err(ConfigError::NotFound("influxdb.database".to_string()));
-            }
-            if influxdb.username.is_none() {
-                return Err(ConfigError::NotFound("influxdb.username".to_string()));
-            }
-            if influxdb.password.is_none() {
-                return Err(ConfigError::NotFound("influxdb.password".to_string()));
-            }
-        }
-
-        if influxdb.version == InfluxDBVersion::V2 {
-            if influxdb.bucket.is_none() {
-                return Err(ConfigError::NotFound("influxdb.bucket".to_string()));
-            }
-            if influxdb.organization.is_none() {
-                return Err(ConfigError::NotFound("influxdb.organization".to_string()));
-            }
-            if influxdb.token.is_none() {
-                return Err(ConfigError::NotFound("influxdb.token".to_string()));
-            }
-        }
-
-        Ok(())
     }
 }
 
@@ -256,4 +335,9 @@ fn get_hostname(default: &str) -> String {
 /// Allows instantiating structs from Uption configuration.
 pub trait Configure {
     fn from_config(config: &UptionConfig) -> Self;
+}
+
+/// Configuration object validation.
+trait Validate {
+    fn validate(&self) -> Result<(), ConfigError>;
 }

@@ -93,9 +93,9 @@ impl Configure for InfluxDBv1 {
     fn from_config(config: &UptionConfig) -> Self {
         InfluxDBv1::new(
             config.exporters.influxdb.url.as_ref().unwrap(),
-            config.exporters.influxdb.database.as_ref().unwrap(),
-            config.exporters.influxdb.username.as_ref().unwrap(),
-            config.exporters.influxdb.password.as_ref().unwrap(),
+            config.exporters.influxdb.database.as_ref(),
+            config.exporters.influxdb.username.as_ref(),
+            config.exporters.influxdb.password.as_ref(),
             config.exporters.influxdb.timeout,
         )
     }
