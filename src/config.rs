@@ -44,7 +44,9 @@ pub struct HttpConfig {
 #[derive(Debug, Deserialize)]
 pub struct ExportersConfig {
     pub exporter: ExporterSelection,
+    pub file: FileConfig,
     pub influxdb: InfluxDBConfig,
+    pub stdout: StdoutConfig,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -72,8 +74,27 @@ pub struct LoggerConfig {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum ExporterSelection {
+    File,
     InfluxDB,
     Stdout,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum FormatSelection {
+    CSV,
+    JSON,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct StdoutConfig {
+    pub format: FormatSelection,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FileConfig {
+    pub filename: Option<String>,
+    pub format: FormatSelection,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -131,8 +152,17 @@ impl UptionConfig {
     fn validate_exporters(exporters: &ExportersConfig) -> Result<(), ConfigError> {
         match exporters.exporter {
             ExporterSelection::InfluxDB => UptionConfig::validate_influxdb(&exporters.influxdb),
+            ExporterSelection::File => UptionConfig::validate_file(&exporters.file),
             ExporterSelection::Stdout => Ok(()),
         }
+    }
+
+    fn validate_file(file: &FileConfig) -> Result<(), ConfigError> {
+        if file.filename.is_none() {
+            return Err(ConfigError::NotFound("file.filename".to_string()));
+        }
+
+        Ok(())
     }
 
     fn validate_influxdb(influxdb: &InfluxDBConfig) -> Result<(), ConfigError> {

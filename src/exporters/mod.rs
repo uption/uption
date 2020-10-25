@@ -151,7 +151,12 @@ impl Configure for ExporterScheduler {
                 InfluxDBVersion::V1 => ExporterScheduler::new(InfluxDBv1::from_config(config)),
                 InfluxDBVersion::V2 => ExporterScheduler::new(InfluxDBv2::from_config(config)),
             },
-            ExporterSelection::Stdout => ExporterScheduler::new(Stdout::new()),
+            ExporterSelection::File => {
+                ExporterScheduler::new(Stdout::new(config.exporters.stdout.format))
+            }
+            ExporterSelection::Stdout => {
+                ExporterScheduler::new(Stdout::new(config.exporters.stdout.format))
+            },
         }
     }
 }
