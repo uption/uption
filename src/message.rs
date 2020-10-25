@@ -67,6 +67,23 @@ impl Message {
             .collect::<Vec<String>>()
             .join(" ")
     }
+
+    pub fn to_json(&self) -> String {
+        serde_json::to_string_pretty(self).expect("Malformed message")
+    }
+
+    pub fn to_csv(&self) -> String {
+        let mut writer = Writer::from_writer(vec![]);
+        let data = [
+            self.timestamp.to_rfc3339(),
+            self.source.to_string(),
+            self.format_tags(),
+            self.format_metrics(),
+        ];
+        writer.write_record(&data).expect("Malformed message");
+        String::from_utf8(writer.into_inner().expect("Malformed message"))
+            .expect("Malformed message")
+    }
 }
 
 impl fmt::Display for Message {
