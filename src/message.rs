@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 use std::fmt;
 
 use chrono::{DateTime, Utc};
+use csv::Writer;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -50,26 +51,33 @@ impl Message {
     pub fn timestamp(&self) -> &DateTime<Utc> {
         &self.timestamp
     }
+
+    pub fn format_tags(&self) -> String {
+        self.tags()
+            .iter()
+            .map(|(k, v)| format!("{}={}", k, v))
+            .collect::<Vec<String>>()
+            .join(" ")
+    }
+
+    pub fn format_metrics(&self) -> String {
+        self.metrics()
+            .iter()
+            .map(|(k, v)| format!("{}={}", k, v))
+            .collect::<Vec<String>>()
+            .join(" ")
+    }
 }
 
 impl fmt::Display for Message {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatted_tags = String::new();
-        for (key, value) in self.tags.iter() {
-            formatted_tags.push_str(&format!(" {}={}", key, value));
-        }
-        let mut formatted_metrics = String::new();
-        for (key, value) in self.metrics.iter() {
-            formatted_metrics.push_str(&format!(" {}={}", key, value));
-        }
-
         write!(
             f,
-            "[{}, source={}{}]{}",
+            "[{}, source={} {}] {}",
             self.timestamp.to_rfc3339(),
             self.source,
-            formatted_tags,
-            formatted_metrics
+            self.format_tags(),
+            self.format_metrics(),
         )
     }
 }
