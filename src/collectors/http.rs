@@ -35,7 +35,7 @@ impl HTTP {
 }
 
 impl Collector for HTTP {
-    fn collect(&self) -> Result<Message> {
+    fn collect(&self) -> Result<Vec<Message>> {
         let now = Instant::now();
         let resp = self.send_request().set_source("http_collector")?;
         let latency = now.elapsed().as_millis();
@@ -45,7 +45,7 @@ impl Collector for HTTP {
         message.insert_metric("status_code", resp.status().as_u16());
         message.insert_tag("url", self.url.as_str());
 
-        Ok(message)
+        Ok(vec![message])
     }
 }
 
@@ -60,7 +60,7 @@ mod tests {
         let m = mockito::mock("HEAD", "/").with_status(201).create();
         let url: HttpUrl = mockito::server_url().parse().unwrap();
         let http = HTTP::new(url.clone(), Timeout(1));
-        let msg = http.collect().unwrap();
+        let msg = http.collect().unwrap().pop().unwrap();
 
         assert_eq!(msg.source(), "http");
         assert_eq!(msg.metrics()["status_code"], PayloadValue::Uint16(201));

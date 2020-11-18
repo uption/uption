@@ -8,6 +8,7 @@ fn test_uption_start_with_empty_config() {
         .unwrap()
         .env("UPTION_COLLECTORS_PING_ENABLED", "false")
         .env("UPTION_COLLECTORS_HTTP_ENABLED", "false")
+        .env("UPTION_COLLECTORS_WIRELESS_ENABLED", "false")
         .timeout(std::time::Duration::from_secs(1))
         .output()
         .unwrap();

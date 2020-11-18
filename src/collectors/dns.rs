@@ -41,14 +41,14 @@ impl Dns {
 }
 
 impl Collector for Dns {
-    fn collect(&self) -> Result<Message> {
+    fn collect(&self) -> Result<Vec<Message>> {
         let latency = self.make_dns_query().set_source("dns_collector")?;
 
         let mut message = Message::new("dns");
         message.insert_metric("latency", latency);
         message.insert_tag("dns_server", &self.server.to_string());
         message.insert_tag("host", &self.host.to_string());
-        Ok(message)
+        Ok(vec![message])
     }
 }
 
@@ -64,7 +64,7 @@ mod tests {
             "www.google.com".parse().unwrap(),
             1,
         );
-        let msg = dns.collect().unwrap();
+        let msg = dns.collect().unwrap().pop().unwrap();
 
         assert_eq!(msg.source(), "dns");
         assert!(msg.metrics().get("latency").is_some());

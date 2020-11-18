@@ -32,6 +32,7 @@ reqwest = { version = "0.10", features = ["blocking", "json", "native-tls-vendor
 serde = { version = "1.0", features = ["derive"] }
 trust-dns-client = { version = "0.20", default-features = false }
 url = { version = "2.1", features = ["serde"] }
+netlink_wi = "0.3"
 
 [dev-dependencies]
 mockito = "0.28"

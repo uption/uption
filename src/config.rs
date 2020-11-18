@@ -101,6 +101,7 @@ pub struct CollectorsConfig {
     pub dns: DnsConfig,
     pub http: HttpConfig,
     pub ping: PingConfig,
+    pub wireless: WirelessConfig,
 }
 
 impl Validate for CollectorsConfig {
@@ -113,6 +114,7 @@ impl Validate for CollectorsConfig {
         self.dns.validate()?;
         self.http.validate()?;
         self.ping.validate()?;
+        self.wireless.validate()?;
         Ok(())
     }
 }
@@ -124,6 +126,7 @@ impl Default for CollectorsConfig {
             dns: DnsConfig::default(),
             http: HttpConfig::default(),
             ping: PingConfig::default(),
+            wireless: WirelessConfig::default(),
         }
     }
 }
@@ -184,6 +187,18 @@ impl Validate for PingConfig {
                 "ping.hosts can't be empty".to_string(),
             ));
         }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
+pub struct WirelessConfig {
+    pub enabled: bool,
+}
+
+impl Validate for WirelessConfig {
+    fn validate(&self) -> Result<(), ConfigError> {
         Ok(())
     }
 }
