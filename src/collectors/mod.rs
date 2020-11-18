@@ -3,6 +3,7 @@
 mod dns;
 mod http;
 mod ping;
+mod wireless;
 
 use std::{thread, time::Duration};
 
@@ -15,6 +16,7 @@ use crate::message::Message;
 pub use dns::Dns;
 pub use http::HTTP;
 pub use ping::Ping;
+pub use wireless::Wireless;
 
 /// Schedules the execution of different collectors. Collectors are not executed
 /// in parallel by design so that they would not interfere with each other.
@@ -44,7 +46,7 @@ impl CollectorScheduler {
 
         loop {
             for collector in self.collectors.iter() {
-                let mut msg = match collector.collect() {
+                let messages = match collector.collect() {
                     Ok(msg) => msg,
                     Err(err) => {
                         error!("{}", err);
@@ -52,15 +54,17 @@ impl CollectorScheduler {
                     }
                 };
 
-                msg.insert_tag("hostname", &hostname);
+                for mut message in messages {
+                    message.insert_tag("hostname", &hostname);
 
-                match sender.send(msg) {
-                    Ok(msg) => msg,
-                    Err(_) => {
-                        error!("Exporter disconnected. Stopping collectors.");
-                        return;
-                    }
-                };
+                    match sender.send(message) {
+                        Ok(_) => (),
+                        Err(_) => {
+                            error!("Exporter disconnected. Stopping collectors.");
+                            return;
+                        }
+                    };
+                }
             }
             thread::sleep(self.interval);
         }
@@ -72,7 +76,7 @@ impl CollectorScheduler {
 pub trait Collector {
     /// Starts data collection in the collector implementation and returns a
     /// message that will be sent to exporter.
-    fn collect(&self) -> Result<Message>;
+    fn collect(&self) -> Result<Vec<Message>>;
 }
 
 impl Configure for CollectorScheduler {
@@ -100,6 +104,11 @@ impl Configure for CollectorScheduler {
                     scheduler.register(Dns::new(*server, host.clone(), dns_config.timeout));
                 }
             }
+        }
+
+        let wireless_config = &config.collectors.wireless;
+        if wireless_config.enabled {
+            scheduler.register(Wireless::new());
         }
 
         scheduler

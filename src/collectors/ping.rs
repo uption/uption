@@ -75,13 +75,13 @@ impl Ping {
 }
 
 impl Collector for Ping {
-    fn collect(&self) -> Result<Message> {
+    fn collect(&self) -> Result<Vec<Message>> {
         let latency = self.get_ping_latency().set_source("ping_collector")?;
 
         let mut message = Message::new("ping");
         message.insert_metric("latency", latency);
         message.insert_tag("host", &self.host.to_string());
-        Ok(message)
+        Ok(vec![message])
     }
 }
 
@@ -113,7 +113,7 @@ mod tests {
     #[ignore]
     fn ping_collect() {
         let ping = Ping::new("localhost".parse().unwrap(), Timeout(1));
-        let msg = ping.collect().unwrap();
+        let msg = ping.collect().unwrap().pop().unwrap();
 
         assert_eq!(msg.source(), "ping");
         assert!(msg.metrics().get("latency").is_some());

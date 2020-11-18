@@ -22,5 +22,8 @@ dns_servers = []
 enabled = false
 hosts = []
 
+[collectors.wireless]
+enabled = false
+
 [exporters]
 exporter = "stdout"

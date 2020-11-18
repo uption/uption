@@ -18,6 +18,7 @@ Types of changes:
 ### Added
 
 - Add default values to all configuration options.
+- Implement wireless interface collector.
 
 ### Changed
 
