@@ -27,6 +27,10 @@ Types of changes:
 
 -
 
+### Infrastructure
+
+- Remove deprecated `set-env` from Github Actions workflows.
+
 ## v0.5.0 - 2020-07-15
 
 ### Added
