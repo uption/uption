@@ -70,7 +70,7 @@ jobs:
 
       - name: Set version environment variable
         run: |
-          echo "::set-env name=version::$(cargo pkgid | cut -d# -f2 | cut -d: -f2)"
+          echo "version=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_ENV
 
       - name: Download cargo-deb artifact
         uses: actions/download-artifact@v1
@@ -103,7 +103,7 @@ jobs:
 
       - name: Set version environment variable
         run: |
-          echo "::set-env name=version::$(cargo pkgid | cut -d# -f2 | cut -d: -f2)"
+          echo "version=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_ENV
 
       - name: Download cargo-deb artifact
         uses: actions/download-artifact@v1
@@ -150,7 +150,7 @@ jobs:
 
       - name: Set version environment variable
         run: |
-          echo "::set-env name=version::$(cargo pkgid | cut -d# -f2 | cut -d: -f2)"
+          echo "version=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_ENV
 
       - name: Download cargo-deb artifact
         uses: actions/download-artifact@v1
@@ -203,7 +203,7 @@ jobs:
         id: variables
         run: |
           export CRATE_VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)
-          echo "::set-env name=version::$CRATE_VERSION"
+          echo "version=$CRATE_VERSION" >> $GITHUB_ENV
 
           export MAJOR=$(echo $CRATE_VERSION | cut -d'.' -f1)
           export MINOR=$(echo $CRATE_VERSION | cut -d'.' -f2)
