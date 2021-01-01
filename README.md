@@ -6,12 +6,12 @@
 [![CI](https://github.com/uption/uption/workflows/CI/badge.svg)](https://github.com/uption/uption/actions?query=workflow%3ACI)
 [![docs](https://img.shields.io/badge/docs-Uption%20wiki-blue)](https://github.com/uption/uption/wiki)
 
-A tool to collect and export network performance metrics on devices like WLAN Pi and Raspberry Pi.
+A tool to collect and export network performance metrics on Linux devices.
 This tool was inspired by [wiperf](https://github.com/wifinigel/wiperf) project.
 
 ## Documentation
 
-Documentation can be found from [Uption wiki](https://github.com/uption/uption/wiki).
+Uption has a concept of _collectors_ and _exporters_. Collectors generate metrics based on different tests and exporters export the generated data. See documentation for all the supported collectors and exporters. Documentation can be found from [Uption wiki](https://github.com/uption/uption/wiki).
 
 ## Installation
 
@@ -37,44 +37,6 @@ dpkg -i uption_x.y.z_amd64.deb
 sudo systemctl enable uption
 sudo systemctl start uption
 ```
-
-## Project status
-
-🚧 This project is in very early stage of development 🚧
-
-### Features
-
-Uption has a concept of _collectors_ and _exporters_. Collectors generate metrics based on different tests and exporters export the generated data.
-
-#### Exporters
-
-- [x] Stdout
-- [x] InfluxDB
-- [x] Logger
-
-#### Collectors
-
-- [x] DNS
-- [x] HTTP
-- [x] Ping
-
-### Feature parity with Wiperf
-
-#### Exporters
-
-- [ ] Splunk ([issue #13](https://github.com/uption/uption/issues/13))
-- [ ] JSON file ([issue #11](https://github.com/uption/uption/issues/11))
-- [ ] CSV file ([issue #12](https://github.com/uption/uption/issues/12))
-
-#### Collectors
-
-- [ ] DHCP ([issue #14](https://github.com/uption/uption/issues/14))
-- [x] DNS
-- [x] HTTP
-- [ ] Iperf3 ([issue #16](https://github.com/uption/uption/issues/16))
-- [ ] Ookla Speedtest ([issue #17](https://github.com/uption/uption/issues/17))
-- [x] Ping
-- [ ] Wireless adapter ([issue #18](https://github.com/uption/uption/issues/18))
 
 ## Contributions
 
