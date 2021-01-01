@@ -137,7 +137,7 @@ impl RetryItem {
 
                 if jitter {
                     let mut rng = rand::thread_rng();
-                    backoff += backoff * rng.gen_range(-0.1, 0.1);
+                    backoff += backoff * rng.gen_range(-0.1..=0.1);
                 }
 
                 Duration::from_millis(backoff as u64)
