@@ -31,6 +31,12 @@ Types of changes:
 
 -
 
+## v0.6.2 - 2021-01-05
+
+### Fixed
+
+- Fix DNS collector default timeout.
+
 ## v0.6.1 - 2021-01-05
 
 ### Fixed
