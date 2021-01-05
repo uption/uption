@@ -31,6 +31,12 @@ Types of changes:
 
 -
 
+## v0.6.1 - 2021-01-05
+
+### Fixed
+
+- Fix wrong path to config file in `etc` folder.
+
 ## v0.6.0 - 2021-01-05
 
 ### Added
