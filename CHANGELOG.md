@@ -17,16 +17,30 @@ Types of changes:
 
 ### Added
 
+-
+
+### Changed
+
+-
+
+### Fixed
+
+-
+
+### Infrastructure
+
+-
+
+## v0.6.0 - 2021-01-05
+
+### Added
+
 - Add default values to all configuration options.
 - Implement wireless interface collector.
 
 ### Changed
 
 - Improve configuration validation.
-
-### Fixed
-
--
 
 ### Infrastructure
 
