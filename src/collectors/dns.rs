@@ -9,6 +9,7 @@ use trust_dns_client::rr::{DNSClass, Name, RecordType};
 use trust_dns_client::udp::UdpClientConnection;
 
 use super::Collector;
+use crate::config::Timeout;
 use crate::error::{Result, ResultError};
 use crate::message::Message;
 use crate::url::Host;
@@ -20,11 +21,11 @@ pub struct Dns {
 }
 
 impl Dns {
-    pub fn new(server: Ipv4Addr, host: Host, timeout: u64) -> Self {
+    pub fn new(server: Ipv4Addr, host: Host, timeout: Timeout) -> Self {
         Self {
             server,
             host,
-            timeout: Duration::from_secs(timeout),
+            timeout: Duration::from_secs(timeout.into()),
         }
     }
 
@@ -62,7 +63,7 @@ mod tests {
         let dns = Dns::new(
             "8.8.8.8".parse().unwrap(),
             "www.google.com".parse().unwrap(),
-            1,
+            Timeout(1),
         );
         let msg = dns.collect().unwrap().pop().unwrap();
 

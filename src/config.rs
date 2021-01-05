@@ -137,7 +137,7 @@ pub struct DnsConfig {
     pub enabled: bool,
     pub dns_servers: Vec<Ipv4Addr>,
     pub hosts: Vec<Host>,
-    pub timeout: u64,
+    pub timeout: Timeout,
 }
 
 impl Validate for DnsConfig {
