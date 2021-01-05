@@ -299,7 +299,7 @@ impl UptionConfig {
     pub fn new() -> Result<Self, ConfigError> {
         let mut s = Config::new();
 
-        if Path::new("/etc/uptions").exists() {
+        if Path::new("/etc/uption").exists() {
             s.merge(File::with_name("/etc/uption/uption"))?;
         } else {
             s.merge(File::with_name("uption"))?;
