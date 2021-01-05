@@ -226,7 +226,7 @@ jobs:
           release_name: Uption ${{ github.ref }}
           body: ${{ steps.variables.outputs.changelog }}
           draft: false
-          prerelease: true
+          prerelease: false
 
       - name: Download amd64 deb package artifact
         uses: actions/download-artifact@v1
