@@ -66,6 +66,20 @@ impl InfluxDB for InfluxDBv2 {
     fn handle_response_errors(resp: Response) -> Result<()> {
         match resp.status() {
             StatusCode::NO_CONTENT => Ok(()),
+            StatusCode::BAD_REQUEST => {
+                let mut err = format!(
+                    "InfluxDB server returned HTTP status '{}' Bad Request",
+                    resp.status().as_u16()
+                );
+                // Set message field to error context if returned
+                if let Ok(body) = resp.json::<ErrorResponse>() {
+                    err.push_str(&format!(": {}", &body.message));
+                };
+                log::error!("{}", err);
+
+                // Do not retry on bad request
+                Ok(())
+            }
             _ => {
                 let err = Error::new(&format!(
                     "InfluxDB server returned unexpected HTTP status '{}'",
@@ -164,5 +178,20 @@ mod tests {
         assert_eq!(err.source().as_ref().unwrap(), "influxdb_v2_exporter");
         assert!(err.cause().is_none());
         m.assert();
+    }
+
+    #[rstest]
+    fn export_failed_with_bad_request(message: Message) {
+        let m = mockito::mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
+            .with_status(400)
+            .with_body("{\"message\": \"error message\"}")
+            .create();
+
+        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let exporter = InfluxDBv2::new(&url, "bucket", "org", "token", Timeout(1));
+        let result = exporter.export(&message);
+
+        m.assert();
+        assert!(result.is_ok());
     }
 }
