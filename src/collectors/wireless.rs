@@ -40,11 +40,11 @@ impl Collector for Wireless {
         let interfaces = self.get_interfaces().set_source("wireless_collector")?;
         let mut messages = Vec::new();
         for interface in interfaces {
+            log::debug!("Found interface: {:?}", interface);
             let mut message = Message::new("wireless_interface");
             if interface.name.is_empty() {
-                return Err(Error::new("Wireless interface name is empty")
-                    .set_source("wireless_collector")
-                    .set_context(&interface.mac.to_string()));
+                log::debug!("Skipping wireless interface with empty name");
+                continue;
             }
             message.insert_tag("name", &interface.name);
             message.insert_tag("interface_mac", &interface.mac.to_string());
@@ -64,12 +64,14 @@ impl Collector for Wireless {
             }
 
             if message.metrics().is_empty() {
+                log::debug!("No metrics found for interface");
                 continue;
             }
             messages.push(message);
 
             let stations = self.get_stations(interface.interface_index)?;
             for station in stations {
+                log::debug!("Found station: {:?}", station);
                 let mut message = Message::new("wireless_station");
                 message.insert_tag("interface_mac", &interface.mac.to_string());
                 message.insert_tag("station_mac", &station.mac.to_string());
@@ -107,6 +109,7 @@ impl Collector for Wireless {
                         .insert_metric("tx_connection_type", rateinfo.connection_type.to_string());
                 }
                 if message.metrics().is_empty() {
+                    log::debug!("No metrics found for station");
                     continue;
                 }
                 messages.push(message);
