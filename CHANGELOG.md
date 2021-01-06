@@ -31,6 +31,12 @@ Types of changes:
 
 -
 
+## v0.6.4 - 2021-01-06
+
+### Changed
+
+- Skip wireless interfaces with empty name in wireless collector. #91
+
 ## v0.6.3 - 2021-01-06
 
 ### Changed
