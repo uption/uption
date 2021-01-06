@@ -55,6 +55,12 @@ impl Collector for Wireless {
             if let Some(tx_power) = interface.tx_power {
                 message.insert_metric("tx_power", tx_power);
             }
+
+            if message.metrics().is_empty() {
+                return Err(Error::new("Wireless interface not connected to a network")
+                    .set_source("wireless_collector")
+                    .set_context(&interface.name));
+            }
             messages.push(message);
 
             let stations = self.get_stations(interface.interface_index)?;
@@ -94,6 +100,9 @@ impl Collector for Wireless {
                     message.insert_metric("tx_mcs", rateinfo.mcs);
                     message
                         .insert_metric("tx_connection_type", rateinfo.connection_type.to_string());
+                }
+                if message.metrics().is_empty() {
+                    continue;
                 }
                 messages.push(message);
             }

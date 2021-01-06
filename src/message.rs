@@ -37,9 +37,6 @@ impl Message {
     }
 
     pub fn metrics(&self) -> &BTreeMap<String, PayloadValue> {
-        if self.metrics.is_empty() {
-            panic!("Message has no metrics!")
-        }
         &self.metrics
     }
 
