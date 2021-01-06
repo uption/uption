@@ -41,10 +41,17 @@ impl Collector for Wireless {
         let mut messages = Vec::new();
         for interface in interfaces {
             let mut message = Message::new("wireless_interface");
+            if interface.name.is_empty() {
+                return Err(Error::new("Wireless interface name is empty")
+                    .set_source("wireless_collector")
+                    .set_context(&interface.mac.to_string()));
+            }
             message.insert_tag("name", &interface.name);
             message.insert_tag("interface_mac", &interface.mac.to_string());
             if let Some(ssid) = interface.ssid {
-                message.insert_tag("ssid", &ssid);
+                if !ssid.is_empty() {
+                    message.insert_tag("ssid", &ssid);
+                }
             }
             if let Some(frequency) = interface.frequency {
                 message.insert_metric("frequency", frequency);
@@ -57,9 +64,7 @@ impl Collector for Wireless {
             }
 
             if message.metrics().is_empty() {
-                return Err(Error::new("Wireless interface not connected to a network")
-                    .set_source("wireless_collector")
-                    .set_context(&interface.name));
+                continue;
             }
             messages.push(message);
 
