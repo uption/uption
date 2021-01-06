@@ -31,6 +31,19 @@ Types of changes:
 
 -
 
+## v0.6.3 - 2021-01-06
+
+### Changed
+
+- Update reqwest to version 0.11.
+- Do not retry InfluxDB export on bad request.
+
+### Fixed
+
+- Fix InfluxDB string metrics missing quotes.
+- Fix wireless collector message without metrics. #90
+- Fix wireless collector sends message with empty tags. #91
+
 ## v0.6.2 - 2021-01-05
 
 ### Fixed
