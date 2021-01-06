@@ -8,6 +8,7 @@ use reqwest::blocking::{Client, RequestBuilder, Response};
 
 use crate::error::Result;
 use crate::message::Message;
+use crate::message::PayloadValue;
 use crate::url::HttpUrl;
 
 pub use influxdb_v1::InfluxDBv1;
@@ -36,7 +37,11 @@ trait InfluxDB {
 
         let mut fields = Vec::new();
         for (key, value) in msg.metrics().iter() {
-            fields.push(format!("{}={}", key, value));
+            if let PayloadValue::String(str_value) = value {
+                fields.push(format!("{}=\"{}\"", key, str_value));
+            } else {
+                fields.push(format!("{}={}", key, value));
+            }
         }
 
         format!(

@@ -125,8 +125,8 @@ mod tests {
         let mut message = Message::new("measurement");
         message.insert_tag("tag1", "1");
         message.insert_tag("tag2", "2");
-        message.insert_metric("field1", "1");
-        message.insert_metric("field2", "2");
+        message.insert_metric("field1", "foo");
+        message.insert_metric("field2", 2);
         message
     }
 
@@ -137,7 +137,7 @@ mod tests {
             .with_header("content-type", "text/plain")
             .with_header("authorization", "Token token")
             .match_body(Regex(
-                r"^measurement,tag1=1,tag2=2 field1=1,field2=2 \d{13}$".to_string(),
+                r#"^measurement,tag1=1,tag2=2 field1="foo",field2=2 \d{13}$"#.to_string(),
             ))
             .create();
 
