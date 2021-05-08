@@ -10,14 +10,14 @@ use crate::error::{Result, ResultError};
 use crate::message::Message;
 use crate::url::HttpUrl;
 
-pub struct HTTP {
+pub struct Http {
     url: HttpUrl,
     timeout: Duration,
 }
 
-impl HTTP {
-    pub fn new(url: HttpUrl, timeout: Timeout) -> HTTP {
-        HTTP {
+impl Http {
+    pub fn new(url: HttpUrl, timeout: Timeout) -> Http {
+        Http {
             url,
             timeout: Duration::from_secs(timeout.into()),
         }
@@ -34,7 +34,7 @@ impl HTTP {
     }
 }
 
-impl Collector for HTTP {
+impl Collector for Http {
     fn collect(&self) -> Result<Vec<Message>> {
         let now = Instant::now();
         let resp = self.send_request().set_source("http_collector")?;
@@ -59,7 +59,7 @@ mod tests {
     fn collect_successful() {
         let m = mockito::mock("HEAD", "/").with_status(201).create();
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let http = HTTP::new(url.clone(), Timeout(1));
+        let http = Http::new(url.clone(), Timeout(1));
         let msg = http.collect().unwrap().pop().unwrap();
 
         assert_eq!(msg.source(), "http");
@@ -72,7 +72,7 @@ mod tests {
     #[test]
     fn collect_failed() {
         let url: HttpUrl = "http://localhost:12345".parse().unwrap();
-        let http = HTTP::new(url, Timeout(1));
+        let http = Http::new(url, Timeout(1));
         let err = http.collect().unwrap_err();
 
         assert_eq!(err.source().as_ref().unwrap(), "http_collector");

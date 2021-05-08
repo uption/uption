@@ -14,7 +14,7 @@ use crate::config::{Configure, UptionConfig};
 use crate::error::Result;
 use crate::message::Message;
 pub use dns::Dns;
-pub use http::HTTP;
+pub use http::Http;
 pub use ping::Ping;
 pub use wireless::Wireless;
 
@@ -93,7 +93,7 @@ impl Configure for CollectorScheduler {
         let http_config = &config.collectors.http;
         if http_config.enabled {
             for url in http_config.urls.iter() {
-                scheduler.register(HTTP::new(url.clone(), http_config.timeout));
+                scheduler.register(Http::new(url.clone(), http_config.timeout));
             }
         }
 

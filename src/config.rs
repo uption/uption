@@ -329,9 +329,9 @@ impl Default for Timeout {
     }
 }
 
-impl Into<u64> for Timeout {
-    fn into(self) -> u64 {
-        self.0
+impl From<Timeout> for u64 {
+    fn from(timeout: Timeout) -> u64 {
+        timeout.0
     }
 }
 
