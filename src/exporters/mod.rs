@@ -15,7 +15,7 @@ use rand::Rng;
 use crate::config::{Configure, ExporterSelection, InfluxDBVersion, UptionConfig};
 use crate::error::{Error, Result};
 use crate::message::Message;
-pub use influxdb::{InfluxDBv1, InfluxDBv2};
+pub use influxdb::{InfluxDbv1, InfluxDbv2};
 pub use logger::Logger;
 pub use stdout::Stdout;
 
@@ -150,8 +150,8 @@ impl Configure for ExporterScheduler {
     fn from_config(config: &UptionConfig) -> Self {
         match config.exporters.exporter {
             ExporterSelection::InfluxDB => match config.exporters.influxdb.version {
-                InfluxDBVersion::V1 => ExporterScheduler::new(InfluxDBv1::from_config(config)),
-                InfluxDBVersion::V2 => ExporterScheduler::new(InfluxDBv2::from_config(config)),
+                InfluxDBVersion::V1 => ExporterScheduler::new(InfluxDbv1::from_config(config)),
+                InfluxDBVersion::V2 => ExporterScheduler::new(InfluxDbv2::from_config(config)),
             },
             ExporterSelection::Stdout => ExporterScheduler::new(Stdout::new()),
             ExporterSelection::Logger => ExporterScheduler::new(Logger::new()),

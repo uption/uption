@@ -6,7 +6,7 @@ use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::StatusCode;
 use serde::Deserialize;
 
-use super::InfluxDB;
+use super::InfluxDb;
 use crate::config::{Configure, Timeout, UptionConfig};
 use crate::error::{Error, Result, ResultError};
 use crate::exporters::Exporter;
@@ -19,27 +19,27 @@ struct ErrorResponse {
     error: String,
 }
 
-pub struct InfluxDBv1 {
+pub struct InfluxDbv1 {
     url: HttpUrl,
     username: String,
     password: String,
     timeout: Duration,
 }
 
-impl InfluxDBv1 {
+impl InfluxDbv1 {
     pub fn new(
         url: &HttpUrl,
         database: &str,
         username: &str,
         password: &str,
         timeout: Timeout,
-    ) -> InfluxDBv1 {
+    ) -> InfluxDbv1 {
         let mut url = url.clone();
         url.set_path("write");
         url.query_pairs_mut().append_pair("db", database);
         url.query_pairs_mut().append_pair("precision", "ms");
 
-        InfluxDBv1 {
+        InfluxDbv1 {
             url,
             username: username.to_string(),
             password: password.to_string(),
@@ -48,7 +48,7 @@ impl InfluxDBv1 {
     }
 }
 
-impl InfluxDB for InfluxDBv1 {
+impl InfluxDb for InfluxDbv1 {
     fn set_authentication(&self, req: RequestBuilder) -> RequestBuilder {
         req.basic_auth(&self.username, Some(&self.password))
     }
@@ -96,16 +96,16 @@ impl InfluxDB for InfluxDBv1 {
     }
 }
 
-impl Exporter for InfluxDBv1 {
+impl Exporter for InfluxDbv1 {
     fn export(&self, message: &Message) -> Result<()> {
         self.send_to_influxdb(message)
             .set_source("influxdb_v1_exporter")
     }
 }
 
-impl Configure for InfluxDBv1 {
+impl Configure for InfluxDbv1 {
     fn from_config(config: &UptionConfig) -> Self {
-        InfluxDBv1::new(
+        InfluxDbv1::new(
             config.exporters.influxdb.url.as_ref().unwrap(),
             config.exporters.influxdb.database.as_ref(),
             config.exporters.influxdb.username.as_ref(),
@@ -146,7 +146,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDBv1::new(&url, "uption", "user", "pass", Timeout(1));
+        let exporter = InfluxDbv1::new(&url, "uption", "user", "pass", Timeout(1));
         let result = exporter.export(&message);
 
         m.assert();
@@ -161,7 +161,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDBv1::new(&url, "uption", "user", "pass", Timeout(1));
+        let exporter = InfluxDbv1::new(&url, "uption", "user", "pass", Timeout(1));
         let err = exporter.export(&message).unwrap_err();
 
         assert_eq!(err.context().as_ref().unwrap(), "error message");
@@ -178,7 +178,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDBv1::new(&url, "uption", "user", "pass", Timeout(1));
+        let exporter = InfluxDbv1::new(&url, "uption", "user", "pass", Timeout(1));
         let result = exporter.export(&message);
 
         m.assert();

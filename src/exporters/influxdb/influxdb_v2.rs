@@ -7,7 +7,7 @@ use reqwest::header::{self, HeaderMap, HeaderValue};
 use reqwest::StatusCode;
 use serde::Deserialize;
 
-use super::InfluxDB;
+use super::InfluxDb;
 use crate::config::{Configure, Timeout, UptionConfig};
 use crate::error::{Error, Result, ResultError};
 use crate::exporters::Exporter;
@@ -20,27 +20,27 @@ struct ErrorResponse {
     message: String,
 }
 
-pub struct InfluxDBv2 {
+pub struct InfluxDbv2 {
     url: HttpUrl,
     token: String,
     timeout: Duration,
 }
 
-impl InfluxDBv2 {
+impl InfluxDbv2 {
     pub fn new(
         url: &HttpUrl,
         bucket: &str,
         organization: &str,
         token: &str,
         timeout: Timeout,
-    ) -> InfluxDBv2 {
+    ) -> InfluxDbv2 {
         let mut url = url.clone();
         url.set_path("api/v2/write");
         url.query_pairs_mut().append_pair("bucket", bucket);
         url.query_pairs_mut().append_pair("org", organization);
         url.query_pairs_mut().append_pair("precision", "ms");
 
-        InfluxDBv2 {
+        InfluxDbv2 {
             url,
             token: String::from(token),
             timeout: Duration::from_secs(timeout.into()),
@@ -52,7 +52,7 @@ impl InfluxDBv2 {
     }
 }
 
-impl InfluxDB for InfluxDBv2 {
+impl InfluxDb for InfluxDbv2 {
     fn set_authentication(&self, req: RequestBuilder) -> RequestBuilder {
         let mut headers = HeaderMap::new();
         headers.insert(
@@ -106,16 +106,16 @@ impl InfluxDB for InfluxDBv2 {
     }
 }
 
-impl Exporter for InfluxDBv2 {
+impl Exporter for InfluxDbv2 {
     fn export(&self, message: &Message) -> Result<()> {
         self.send_to_influxdb(message)
             .set_source("influxdb_v2_exporter")
     }
 }
 
-impl Configure for InfluxDBv2 {
+impl Configure for InfluxDbv2 {
     fn from_config(config: &UptionConfig) -> Self {
-        InfluxDBv2::new(
+        InfluxDbv2::new(
             config.exporters.influxdb.url.as_ref().unwrap(),
             config.exporters.influxdb.bucket.as_ref(),
             config.exporters.influxdb.organization.as_ref(),
@@ -156,7 +156,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDBv2::new(&url, "bucket", "org", "token", Timeout(1));
+        let exporter = InfluxDbv2::new(&url, "bucket", "org", "token", Timeout(1));
         let result = exporter.export(&message);
 
         m.assert();
@@ -171,7 +171,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDBv2::new(&url, "bucket", "org", "token", Timeout(1));
+        let exporter = InfluxDbv2::new(&url, "bucket", "org", "token", Timeout(1));
         let err = exporter.export(&message).unwrap_err();
 
         assert_eq!(err.context().as_ref().unwrap(), "error message");
@@ -188,7 +188,7 @@ mod tests {
             .create();
 
         let url: HttpUrl = mockito::server_url().parse().unwrap();
-        let exporter = InfluxDBv2::new(&url, "bucket", "org", "token", Timeout(1));
+        let exporter = InfluxDbv2::new(&url, "bucket", "org", "token", Timeout(1));
         let result = exporter.export(&message);
 
         m.assert();

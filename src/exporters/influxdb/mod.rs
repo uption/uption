@@ -11,10 +11,10 @@ use crate::message::Message;
 use crate::message::PayloadValue;
 use crate::url::HttpUrl;
 
-pub use influxdb_v1::InfluxDBv1;
-pub use influxdb_v2::InfluxDBv2;
+pub use influxdb_v1::InfluxDbv1;
+pub use influxdb_v2::InfluxDbv2;
 
-trait InfluxDB {
+trait InfluxDb {
     fn set_authentication(&self, req: RequestBuilder) -> RequestBuilder;
 
     fn handle_response_errors(resp: Response) -> Result<()>;
