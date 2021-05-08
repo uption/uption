@@ -207,13 +207,13 @@ impl Validate for WirelessConfig {
 #[serde(default)]
 pub struct ExportersConfig {
     pub exporter: ExporterSelection,
-    pub influxdb: InfluxDBConfig,
+    pub influxdb: InfluxDbConfig,
 }
 
 impl Validate for ExportersConfig {
     fn validate(&self) -> Result<(), ConfigError> {
         match self.exporter {
-            ExporterSelection::InfluxDB => self.influxdb.validate(),
+            ExporterSelection::InfluxDb => self.influxdb.validate(),
             ExporterSelection::Stdout => Ok(()),
             ExporterSelection::Logger => Ok(()),
         }
@@ -223,7 +223,7 @@ impl Validate for ExportersConfig {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum ExporterSelection {
-    InfluxDB,
+    InfluxDb,
     Stdout,
     Logger,
 }
@@ -236,7 +236,7 @@ impl Default for ExporterSelection {
 
 #[derive(Debug, Deserialize, Default)]
 #[serde(default)]
-pub struct InfluxDBConfig {
+pub struct InfluxDbConfig {
     pub url: Option<HttpUrl>,
     pub bucket: String,
     pub organization: String,
@@ -244,17 +244,17 @@ pub struct InfluxDBConfig {
     pub database: String,
     pub username: String,
     pub password: String,
-    pub version: InfluxDBVersion,
+    pub version: InfluxDbVersion,
     pub timeout: Timeout,
 }
 
-impl Validate for InfluxDBConfig {
+impl Validate for InfluxDbConfig {
     fn validate(&self) -> Result<(), ConfigError> {
         if self.url.is_none() {
             return Err(ConfigError::NotFound("influxdb.url".to_string()));
         }
 
-        if self.version == InfluxDBVersion::V1 {
+        if self.version == InfluxDbVersion::V1 {
             if self.database.is_empty() {
                 return Err(ConfigError::NotFound("influxdb.database".to_string()));
             }
@@ -266,7 +266,7 @@ impl Validate for InfluxDBConfig {
             }
         }
 
-        if self.version == InfluxDBVersion::V2 {
+        if self.version == InfluxDbVersion::V2 {
             if self.bucket.is_empty() {
                 return Err(ConfigError::NotFound("influxdb.bucket".to_string()));
             }
@@ -284,14 +284,14 @@ impl Validate for InfluxDBConfig {
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
-pub enum InfluxDBVersion {
+pub enum InfluxDbVersion {
     V1,
     V2,
 }
 
-impl Default for InfluxDBVersion {
+impl Default for InfluxDbVersion {
     fn default() -> Self {
-        InfluxDBVersion::V2
+        InfluxDbVersion::V2
     }
 }
 
