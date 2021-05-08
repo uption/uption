@@ -31,7 +31,7 @@ jobs:
 
   build-and-test:
     name: Build crate and run tests
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     needs: verify-version
 
     steps:
@@ -46,7 +46,7 @@ jobs:
 
   install-cargo-deb:
     name: Build and install cargo deb
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     needs: verify-version
 
     steps:
@@ -61,7 +61,7 @@ jobs:
 
   create-amd64-deb-package:
     name: Create amd64 debian package
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     needs: install-cargo-deb
 
     steps:
@@ -94,7 +94,7 @@ jobs:
 
   create-arm64-deb-package:
     name: Create arm64 debian packages
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     needs: install-cargo-deb
 
     steps:
@@ -141,7 +141,7 @@ jobs:
 
   create-arm32-deb-package:
     name: Create arm32 debian package
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     needs: install-cargo-deb
 
     steps:
