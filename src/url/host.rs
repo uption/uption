@@ -28,7 +28,7 @@ impl str::FromStr for Host {
 impl fmt::Display for Host {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Host::Host(host) => write!(f, "{}", host.to_string()),
+            Host::Host(host) => write!(f, "{}", host),
         }
     }
 }

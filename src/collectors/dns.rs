@@ -30,7 +30,7 @@ impl Dns {
     }
 
     fn make_dns_query(&self) -> Result<u128> {
-        let server_address = format!("{}:53", self.server.to_string()).parse()?;
+        let server_address = format!("{}:53", self.server).parse()?;
         let conn = UdpClientConnection::with_timeout(server_address, self.timeout)?;
         let client = SyncClient::new(conn);
         let name = Name::from_str(&self.host.to_string())?;

@@ -68,7 +68,7 @@ impl fmt::Display for Error {
         }
 
         if let Some(err) = self.cause.as_ref() {
-            error_info.push(format!("cause=\"{}\"", err.to_string()));
+            error_info.push(format!("cause=\"{}\"", err));
         }
 
         write!(f, "{} ({})", self.msg, error_info.join(" "))

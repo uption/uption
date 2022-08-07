@@ -59,7 +59,7 @@ impl Configure for Logger {
         };
 
         if let Some(log_file) = &logger_config.log_file {
-            return logger.enable_log_to_file(&log_file);
+            return logger.enable_log_to_file(log_file);
         }
         logger
     }

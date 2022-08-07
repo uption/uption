@@ -46,7 +46,7 @@ impl HttpUrl {
     }
 
     pub fn as_str(&self) -> &str {
-        &self.url.as_str()
+        self.url.as_str()
     }
 
     pub fn query_pairs_mut(&mut self) -> Serializer<UrlQuery> {

@@ -1,4 +1,5 @@
 //! InfluxDB API v1 exporter implementation.
+use std::fmt::Write as _;
 use std::str;
 use std::time::Duration;
 
@@ -63,7 +64,7 @@ impl InfluxDb for InfluxDbv1 {
                 );
                 // Set message field to error context if returned
                 if let Ok(body) = resp.json::<ErrorResponse>() {
-                    err.push_str(&format!(": {}", &body.error));
+                    write!(err, ": {}", &body.error).unwrap();
                 };
                 log::error!("{}", err);
 
