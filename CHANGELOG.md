@@ -31,6 +31,12 @@ Types of changes:
 
 -
 
+## v0.6.5 - 2022-08-07
+
+### Security
+
+- Update all dependencies with known security issues.
+
 ## v0.6.4 - 2021-01-06
 
 ### Changed
