@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Verify versions match
         run: |
@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build (release)
         run: cargo build --release --locked
@@ -54,7 +54,7 @@ jobs:
         run: cargo install cargo-deb --root=./
 
       - name: Create cargo-deb artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: cargo-deb
           path: bin/cargo-deb
@@ -66,14 +66,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set version environment variable
         run: |
           echo "version=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_ENV
 
       - name: Download cargo-deb artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: cargo-deb
 
@@ -87,7 +87,7 @@ jobs:
           cargo-deb/cargo-deb --target=x86_64-unknown-linux-gnu
 
       - name: Create amd64 deb package artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: debian_amd64
           path: target/x86_64-unknown-linux-gnu/debian/uption_${{ env.version }}_amd64.deb
@@ -99,14 +99,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set version environment variable
         run: |
           echo "version=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_ENV
 
       - name: Download cargo-deb artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: cargo-deb
 
@@ -134,7 +134,7 @@ jobs:
           cargo-deb/cargo-deb --target=aarch64-unknown-linux-gnu
 
       - name: Create arm64 deb package artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: debian_arm64
           path: target/aarch64-unknown-linux-gnu/debian/uption_${{ env.version }}_arm64.deb
@@ -146,14 +146,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set version environment variable
         run: |
           echo "version=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_ENV
 
       - name: Download cargo-deb artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: cargo-deb
 
@@ -181,7 +181,7 @@ jobs:
           cargo-deb/cargo-deb --target=armv7-unknown-linux-gnueabihf
 
       - name: Create arm32 deb package artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: debian_arm32
           path: target/armv7-unknown-linux-gnueabihf/debian/uption_${{ env.version }}_armhf.deb
@@ -197,7 +197,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set version and changelog environment variables
         id: variables
@@ -229,7 +229,7 @@ jobs:
           prerelease: false
 
       - name: Download amd64 deb package artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3v3
         with:
           name: debian_amd64
 
@@ -244,7 +244,7 @@ jobs:
           asset_content_type: vnd.debian.binary-package
 
       - name: Download arm64 deb package artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: debian_arm64
 
@@ -259,7 +259,7 @@ jobs:
           asset_content_type: vnd.debian.binary-package
 
       - name: Download arm32 deb package artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: debian_arm32
 
