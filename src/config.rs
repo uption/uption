@@ -297,23 +297,25 @@ impl Default for InfluxDbVersion {
 
 impl UptionConfig {
     pub fn new() -> Result<Self, ConfigError> {
-        let mut s = Config::new();
+        let mut s = Config::builder();
 
         if Path::new("/etc/uption").exists() {
-            s.merge(File::with_name("/etc/uption/uption"))?;
+            s = s.add_source(File::with_name("/etc/uption/uption"));
         } else {
-            s.merge(File::with_name("uption"))?;
+            s = s.add_source(File::with_name("uption"));
         }
         // Read development config only for debug builds
         #[cfg(debug_assertions)]
-        s.merge(File::with_name("uption.local.").required(false))?;
+        {
+            s = s.add_source(File::with_name("uption.local.").required(false));
+        }
 
         // Add in settings from the environment (with a prefix of UPTION)
         let env = Environment::with_prefix("uption");
         let env = env.separator("_");
-        s.merge(env)?;
+        s = s.add_source(env);
 
-        let config: Self = s.try_into()?;
+        let config: Self = s.build()?.try_deserialize()?;
         config.validate()?;
 
         Ok(config)

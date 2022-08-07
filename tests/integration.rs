@@ -12,7 +12,7 @@ fn test_uption_start_with_empty_config() {
         .timeout(std::time::Duration::from_secs(1))
         .output()
         .unwrap();
-    output.status.success();
+    assert!(output.status.success());
     assert!(
         str::from_utf8(&output.stdout)
             .unwrap()
