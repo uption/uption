@@ -52,7 +52,7 @@ impl Default for GeneralConfig {
     }
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "lowercase")]
 #[serde(remote = "LevelFilter")]
 #[serde(rename = "log_level")]
@@ -220,7 +220,7 @@ impl Validate for ExportersConfig {
     }
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum ExporterSelection {
     InfluxDb,
@@ -282,7 +282,7 @@ impl Validate for InfluxDbConfig {
     }
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum InfluxDbVersion {
     V1,
