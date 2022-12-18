@@ -21,27 +21,43 @@ version = "0.6.5"
 chrono = { version = "0.4", features = ["serde"] }
 config = "0.13"
 crossbeam-channel = "0.5"
-ctrlc = "3.1"
+ctrlc = "3.2"
 fern = "0.6"
 log = "0.4"
 rand = "0.8"
-regex = "1.3"
-reqwest = { version = "0.11", features = ["blocking", "json", "native-tls-vendored"] }
+regex = "1.7"
+reqwest = { version = "0.11", features = [
+  "blocking",
+  "json",
+  "native-tls-vendored",
+] }
 serde = { version = "1.0", features = ["derive"] }
-trust-dns-client = { version = "0.21", default-features = false }
-url = { version = "2.1", features = ["serde"] }
+trust-dns-client = { version = "0.22", default-features = false }
+url = { version = "2.3", features = ["serde"] }
 netlink_wi = "0.3"
 
 [dev-dependencies]
 mockito = "0.31"
-rstest = "0.13"
+rstest = "0.16"
 assert_cmd = "2.0"
 
 [package.metadata.deb]
 assets = [
-  ["target/release/uption", "/usr/bin/", "755"],
-  ["uption.toml", "/etc/uption/", "644"],
-  ["build/uption.service", "/etc/systemd/system/", "644"],
+  [
+    "target/release/uption",
+    "/usr/bin/",
+    "755",
+  ],
+  [
+    "uption.toml",
+    "/etc/uption/",
+    "644",
+  ],
+  [
+    "build/uption.service",
+    "/etc/systemd/system/",
+    "644",
+  ],
 ]
 conf-files = ["/etc/uption/uption.toml", "/etc/systemd/system/uption.service"]
 depends = "libgcc1, libc6, systemd"
