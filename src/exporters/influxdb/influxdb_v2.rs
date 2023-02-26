@@ -147,7 +147,9 @@ mod tests {
 
     #[rstest]
     fn export_successful(message: Message) {
-        let m = mockito::mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
+        let mut server = mockito::Server::new();
+        let m = server
+            .mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
             .with_status(204)
             .with_header("content-type", "text/plain")
             .with_header("authorization", "Token token")
@@ -156,7 +158,7 @@ mod tests {
             ))
             .create();
 
-        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let url: HttpUrl = server.url().parse().unwrap();
         let exporter = InfluxDbv2::new(&url, "bucket", "org", "token", Timeout(1));
         let result = exporter.export(&message);
 
@@ -166,12 +168,14 @@ mod tests {
 
     #[rstest]
     fn export_failed(message: Message) {
-        let m = mockito::mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
+        let mut server = mockito::Server::new();
+        let m = server
+            .mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
             .with_status(500)
             .with_body("{\"message\": \"error message\"}")
             .create();
 
-        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let url: HttpUrl = server.url().parse().unwrap();
         let exporter = InfluxDbv2::new(&url, "bucket", "org", "token", Timeout(1));
         let err = exporter.export(&message).unwrap_err();
 
@@ -183,12 +187,14 @@ mod tests {
 
     #[rstest]
     fn export_failed_with_bad_request(message: Message) {
-        let m = mockito::mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
+        let mut server = mockito::Server::new();
+        let m = server
+            .mock("POST", "/api/v2/write?bucket=bucket&org=org&precision=ms")
             .with_status(400)
             .with_body("{\"message\": \"error message\"}")
             .create();
 
-        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let url: HttpUrl = server.url().parse().unwrap();
         let exporter = InfluxDbv2::new(&url, "bucket", "org", "token", Timeout(1));
         let result = exporter.export(&message);
 

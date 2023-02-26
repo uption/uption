@@ -137,7 +137,9 @@ mod tests {
 
     #[rstest]
     fn export_successful(message: Message) {
-        let m = mockito::mock("POST", "/write?db=uption&precision=ms")
+        let mut server = mockito::Server::new();
+        let m = server
+            .mock("POST", "/write?db=uption&precision=ms")
             .with_status(204)
             .with_header("content-type", "text/plain")
             .with_header("authorization", "Basic token")
@@ -146,7 +148,7 @@ mod tests {
             ))
             .create();
 
-        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let url: HttpUrl = server.url().parse().unwrap();
         let exporter = InfluxDbv1::new(&url, "uption", "user", "pass", Timeout(1));
         let result = exporter.export(&message);
 
@@ -156,12 +158,14 @@ mod tests {
 
     #[rstest]
     fn export_failed(message: Message) {
-        let m = mockito::mock("POST", "/write?db=uption&precision=ms")
+        let mut server = mockito::Server::new();
+        let m = server
+            .mock("POST", "/write?db=uption&precision=ms")
             .with_status(500)
             .with_body("{\"error\": \"error message\"}")
             .create();
 
-        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let url: HttpUrl = server.url().parse().unwrap();
         let exporter = InfluxDbv1::new(&url, "uption", "user", "pass", Timeout(1));
         let err = exporter.export(&message).unwrap_err();
 
@@ -173,12 +177,14 @@ mod tests {
 
     #[rstest]
     fn export_failed_with_bad_request(message: Message) {
-        let m = mockito::mock("POST", "/write?db=uption&precision=ms")
+        let mut server = mockito::Server::new();
+        let m = server
+            .mock("POST", "/write?db=uption&precision=ms")
             .with_status(400)
             .with_body("{\"error\": \"error message\"}")
             .create();
 
-        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let url: HttpUrl = server.url().parse().unwrap();
         let exporter = InfluxDbv1::new(&url, "uption", "user", "pass", Timeout(1));
         let result = exporter.export(&message);
 

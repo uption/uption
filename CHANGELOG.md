@@ -31,6 +31,11 @@ Types of changes:
 
 -
 
+### Security
+
+- Update `tokio` to `~> 1.23.1`.
+- Update `openssl-src` to `~> 111.25`.
+
 ## v0.6.5 - 2022-08-07
 
 ### Security

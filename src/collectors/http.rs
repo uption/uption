@@ -57,8 +57,9 @@ mod tests {
     use crate::message::PayloadValue;
     #[test]
     fn collect_successful() {
-        let m = mockito::mock("HEAD", "/").with_status(201).create();
-        let url: HttpUrl = mockito::server_url().parse().unwrap();
+        let mut server = mockito::Server::new();
+        let m = server.mock("HEAD", "/").with_status(201).create();
+        let url: HttpUrl = server.url().parse().unwrap();
         let http = Http::new(url.clone(), Timeout(1));
         let msg = http.collect().unwrap().pop().unwrap();
 
