@@ -31,6 +31,8 @@ Types of changes:
 
 -
 
+## v0.6.6 - 2023-02-26
+
 ### Security
 
 - Update `tokio` to `~> 1.23.1`.
