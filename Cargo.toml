@@ -7,7 +7,7 @@ description = """
 A tool to collect and export network performance metrics on Linux devices.
 """
 documentation = "https://github.com/uption/uption/wiki"
-edition = "2018"
+edition = "2021"
 exclude = [".github/*"]
 homepage = "https://github.com/uption/uption"
 keywords = ["network", "wifi", "metrics"]
