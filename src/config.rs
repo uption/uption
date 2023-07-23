@@ -220,18 +220,13 @@ impl Validate for ExportersConfig {
     }
 }
 
-#[derive(Debug, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Eq, PartialEq, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum ExporterSelection {
     InfluxDb,
+    #[default]
     Stdout,
     Logger,
-}
-
-impl Default for ExporterSelection {
-    fn default() -> Self {
-        ExporterSelection::Stdout
-    }
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -282,17 +277,12 @@ impl Validate for InfluxDbConfig {
     }
 }
 
-#[derive(Debug, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Eq, PartialEq, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum InfluxDbVersion {
     V1,
+    #[default]
     V2,
-}
-
-impl Default for InfluxDbVersion {
-    fn default() -> Self {
-        InfluxDbVersion::V2
-    }
 }
 
 impl UptionConfig {

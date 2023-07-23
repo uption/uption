@@ -37,8 +37,8 @@ url = { version = "2.3", features = ["serde"] }
 netlink_wi = "0.3"
 
 [dev-dependencies]
-mockito = "0.32"
-rstest = "0.16"
+mockito = "1.1"
+rstest = "0.18"
 assert_cmd = "2.0"
 
 [package.metadata.deb]
