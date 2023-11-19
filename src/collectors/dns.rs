@@ -4,9 +4,9 @@ use std::net::Ipv4Addr;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
 
-use trust_dns_client::client::{Client, SyncClient};
-use trust_dns_client::rr::{DNSClass, Name, RecordType};
-use trust_dns_client::udp::UdpClientConnection;
+use hickory_client::client::{Client, SyncClient};
+use hickory_client::rr::{DNSClass, Name, RecordType};
+use hickory_client::udp::UdpClientConnection;
 
 use super::Collector;
 use crate::config::Timeout;
