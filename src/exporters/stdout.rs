@@ -1,4 +1,6 @@
 //! Stdout exporter.
+use std::fmt::Write;
+
 use super::Exporter;
 use crate::error::Result;
 use crate::message::Message;
@@ -11,17 +13,18 @@ impl Stdout {
     }
 
     fn format_message(msg: &Message) -> String {
-        let formatted_tags: String = msg
-            .tags()
-            .iter()
-            .map(|(k, v)| format!(" {}=\"{}\"", k, v))
-            .collect();
+        let formatted_tags: String = msg.tags().iter().fold(String::new(), |mut output, (k, v)| {
+            let _ = write!(output, " {}=\"{}\"", k, v);
+            output
+        });
 
-        let formatted_metrics: String = msg
-            .metrics()
-            .iter()
-            .map(|(k, v)| format!(" {}=\"{}\"", k, v))
-            .collect();
+        let formatted_metrics: String =
+            msg.metrics()
+                .iter()
+                .fold(String::new(), |mut output, (k, v)| {
+                    let _ = write!(output, " {}=\"{}\"", k, v);
+                    output
+                });
 
         format!(
             "[{}] [source=\"{}\"{}]{}",
