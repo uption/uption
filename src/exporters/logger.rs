@@ -1,4 +1,6 @@
 //! Log exporter uses Uption logger to export messages.
+use std::fmt::Write;
+
 use log::info;
 
 use super::Exporter;
@@ -13,18 +15,21 @@ impl Logger {
     }
 
     fn format_message(msg: &Message) -> String {
-        let formatted_tags: String = msg
-            .tags()
-            .iter()
-            .filter(|(k, _)| *k != "hostname")
-            .map(|(k, v)| format!(" {}=\"{}\"", k, v))
-            .collect();
+        let formatted_tags: String = msg.tags().iter().filter(|(k, _)| *k != "hostname").fold(
+            String::new(),
+            |mut output, (k, v)| {
+                let _ = write!(output, " {}=\"{}\"", k, v);
+                output
+            },
+        );
 
-        let formatted_metrics: String = msg
-            .metrics()
-            .iter()
-            .map(|(k, v)| format!(" {}=\"{}\"", k, v))
-            .collect();
+        let formatted_metrics: String =
+            msg.metrics()
+                .iter()
+                .fold(String::new(), |mut output, (k, v)| {
+                    let _ = write!(output, " {}=\"{}\"", k, v);
+                    output
+                });
 
         format!(
             "timestamp=\"{}\" source=\"{}\"{}{}",
