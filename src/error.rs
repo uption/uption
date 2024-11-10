@@ -85,8 +85,10 @@ impl<E: error::Error + 'static> From<E> for Error {
 pub trait ResultError {
     fn set_source(self, source: &str) -> Self;
 
+    #[allow(dead_code)]
     fn set_cause(self, cause: impl error::Error + 'static) -> Self;
 
+    #[allow(dead_code)]
     fn set_context(self, context: &str) -> Self;
 }
 
