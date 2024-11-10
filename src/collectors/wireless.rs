@@ -1,6 +1,8 @@
 //! Wireless interface collector gathers information about wireless interfaces
 //! from the operating system.
-use netlink_wi::{AttrParseError, NlSocket, WirelessInterface, WirelessStation};
+use netlink_wi::interface::{ChannelWidth, WirelessInterface};
+use netlink_wi::station::WirelessStation;
+use netlink_wi::NlSocket;
 
 use super::Collector;
 use crate::error::{Error, Result, ResultError};
@@ -14,11 +16,8 @@ impl Wireless {
     }
 
     fn get_interfaces(&self) -> Result<Vec<WirelessInterface>> {
-        let socket = NlSocket::connect()?;
-        let interfaces = socket
-            .list_interfaces()?
-            .into_iter()
-            .collect::<std::result::Result<Vec<_>, AttrParseError>>()?;
+        let mut socket = NlSocket::connect()?;
+        let interfaces = socket.list_interfaces()?;
         if interfaces.is_empty() {
             return Err(Error::new("No wireless interfaces found"));
         }
@@ -26,11 +25,8 @@ impl Wireless {
     }
 
     fn get_stations(&self, if_index: u32) -> Result<Vec<WirelessStation>> {
-        let socket = NlSocket::connect()?;
-        let stations = socket
-            .list_stations(if_index)?
-            .into_iter()
-            .collect::<std::result::Result<Vec<_>, AttrParseError>>()?;
+        let mut socket = NlSocket::connect()?;
+        let stations = socket.list_stations(if_index)?;
         Ok(stations)
     }
 }
@@ -48,6 +44,7 @@ impl Collector for Wireless {
             }
             message.insert_tag("name", &interface.name);
             message.insert_tag("interface_mac", &interface.mac.to_string());
+
             if let Some(ssid) = interface.ssid {
                 if !ssid.is_empty() {
                     message.insert_tag("ssid", &ssid);
@@ -56,8 +53,8 @@ impl Collector for Wireless {
             if let Some(frequency) = interface.frequency {
                 message.insert_metric("frequency", frequency);
             }
-            if let Some(channel_width) = interface.channel_width {
-                message.insert_metric("channel_width", Into::<u32>::into(channel_width));
+            if let Some(channel_width) = channel_width_to_number(&interface.channel_width) {
+                message.insert_metric("channel_width", channel_width);
             }
             if let Some(tx_power) = interface.tx_power {
                 message.insert_metric("tx_power", tx_power);
@@ -117,4 +114,25 @@ impl Collector for Wireless {
         }
         Ok(messages)
     }
+}
+
+fn channel_width_to_number(channel_width: &ChannelWidth) -> Option<u32> {
+    let ch = match channel_width {
+        ChannelWidth::Width20NoHT => 20,
+        ChannelWidth::Width20 => 20,
+        ChannelWidth::Width40 => 40,
+        ChannelWidth::Width80 => 80,
+        ChannelWidth::Width80P80 => 160,
+        ChannelWidth::Width160 => 160,
+        ChannelWidth::Width5 => 5,
+        ChannelWidth::Width10 => 10,
+        ChannelWidth::Width1 => 1,
+        ChannelWidth::Width2 => 2,
+        ChannelWidth::Width4 => 4,
+        ChannelWidth::Width8 => 8,
+        ChannelWidth::Width16 => 16,
+        ChannelWidth::Width320 => 320,
+        ChannelWidth::Unknown => return None,
+    };
+    Some(ch)
 }

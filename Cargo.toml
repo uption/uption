@@ -19,26 +19,22 @@ version = "0.6.6"
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
-config = "0.13"
+config = "0.14"
 crossbeam-channel = "0.5"
 ctrlc = "3.2"
-fern = "0.6"
+fern = "0.7"
 log = "0.4"
 rand = "0.8"
 regex = "1.7"
-reqwest = { version = "0.11", features = [
-  "blocking",
-  "json",
-  "native-tls-vendored",
-] }
+reqwest = { version = "0.12", features = ["blocking", "json", "rustls-tls"] }
 serde = { version = "1.0", features = ["derive"] }
 hickory-client = { version = "0.24", default-features = false }
 url = { version = "2.3", features = ["serde"] }
-netlink_wi = "0.3"
+netlink_wi = "0.7.0-rc4"
 
 [dev-dependencies]
 mockito = "1.1"
-rstest = "0.18"
+rstest = "0.23"
 assert_cmd = "2.0"
 
 [package.metadata.deb]
