@@ -12,23 +12,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-registry-
+        uses: actions/checkout@v4
 
       - name: Cache cargo build
-        uses: actions/cache@v3
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-build-
+        uses: Swatinem/rust-cache@v2
 
       - name: Build
         run: cargo build --locked
@@ -45,10 +32,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install clippy
-        run: rustup component add clippy
+        uses: actions/checkout@v4
 
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
@@ -58,8 +42,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - run: rustup component add rustfmt
+      - uses: actions/checkout@v4
       - run: cargo fmt --all -- --check
 
   block-autosquash-commits:
@@ -69,6 +52,6 @@ jobs:
 
     steps:
       - name: Block autosquash commits
-        uses: xt0rted/block-autosquash-commits-action@v2.0.0
+        uses: xt0rted/block-autosquash-commits-action@v2
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
